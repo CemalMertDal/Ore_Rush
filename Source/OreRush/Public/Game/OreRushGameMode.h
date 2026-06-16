@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Core/OreRushTypes.h"
 #include "OreRushGameMode.generated.h"
 
 /**
@@ -18,4 +19,15 @@ class ORERUSH_API AOreRushGameMode : public AGameModeBase
 
 public:
 	AOreRushGameMode();
+
+	virtual void InitGameState() override;
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+	void CheckWinCondition();
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Ore Rush|Match")
+	int32 QuotaTarget = 20;
+
+	ETeam PickTeamForNewPlayer();
 };

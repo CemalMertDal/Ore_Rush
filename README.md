@@ -68,7 +68,7 @@ Source/OreRush/
 - [x] Character + input + dash + replication
 - [x] Ore veins (3 types) + mining + wallet
 - [x] Depot + vault + score
-- [ ] GameMode + quota + win condition
+- [x] GameMode + quota + win condition
 - [ ] Economy + traps
 - [ ] Depot raiding + defenses
 - [ ] Power-ups
@@ -82,3 +82,4 @@ Source/OreRush/
 - **16/06/2026** — Added the third-person miner character: movement, camera, jump, and server-authoritative **dash**.
 - **16/06/2026** — Added the ore system: 3 vein types (iron / gold / diamond), look-and-mine mechanic, and the wallet (carrying + slow-down when full).
 - **16/06/2026** — Added depots: deposit your wallet into your team vault to score (server-authoritative, replicated team scores).
+- **17/06/2026** — Added match flow: automatic team assignment (host Red / joiner Blue), score quota, and win condition — the first team to fill the quota wins.
