@@ -72,3 +72,8 @@ Plugins/**/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# --- Ore Rush: pushlanmayacak yerel dosyalar (ödev gereği) ---
+/.claude/
+/.idea/
+/docs/
