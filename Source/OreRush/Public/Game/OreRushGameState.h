@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
+#include "Core/OreRushTypes.h"
 #include "OreRushGameState.generated.h"
 
 /**
@@ -32,6 +33,9 @@ public:
 	/** Prosedürel harita seed'i (deterministik üretim için senkron). */
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Ore Rush|Map")
 	int32 MapSeed = 0;
+
+	/** Takım skorunu artırır (yalnız sunucu). */
+	void AddScore(ETeam Team, int32 Amount);
 
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

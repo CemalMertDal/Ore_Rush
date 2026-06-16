@@ -17,6 +17,7 @@
 #include "CollisionQueryParams.h"
 #include "TimerManager.h"
 #include "Net/UnrealNetwork.h"
+#include "Player/OreRushPlayerState.h"
 
 AOreRushCharacter::AOreRushCharacter()
 {
@@ -83,6 +84,20 @@ void AOreRushCharacter::BeginPlay()
 	if (Wallet)
 	{
 		Wallet->OnWalletChanged.AddDynamic(this, &AOreRushCharacter::UpdateCarrySpeed);
+	}
+}
+
+void AOreRushCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (HasAuthority())
+	{
+		if (AOreRushPlayerState* PS = Cast<AOreRushPlayerState>(GetPlayerState()))
+		{
+			// Test amaçlı: karakteri varsayılan olarak Mavi (Blue) takıma ata.
+			PS->SetTeam(ETeam::Blue);
+		}
 	}
 }
 
