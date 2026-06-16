@@ -126,6 +126,11 @@ void AOreRushCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 void AOreRushCharacter::Move(const FInputActionValue& Value)
 {
+	if (bIsMining)
+	{
+		return;
+	}
+
 	const FVector2D Axis = Value.Get<FVector2D>();
 
 	if (Controller == nullptr)
@@ -329,6 +334,11 @@ AOreVein* AOreRushCharacter::TraceForVein() const
 
 void AOreRushCharacter::OnRep_IsMining()
 {
+	if (bIsMining)
+	{
+		GetCharacterMovement()->StopMovementImmediately();
+	}
+
 	OnMiningStateChanged(bIsMining);
 }
 
