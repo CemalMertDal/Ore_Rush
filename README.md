@@ -61,10 +61,7 @@ Source/OreRush/
 
 ## 🚀 Getting Started
 
-1. Clone the repository.
-2. Right-click `Ore_Rush.uproject` → **Generate Visual Studio project files**.
-3. Open the solution and build as **Development Editor** (or just double-click the `.uproject`).
-4. In the editor: **Play** → *Net Mode: Play As Listen Server*, *Number of Players: 2* to test with two players.
+-On development
 
 ## 🗺️ Roadmap
 
