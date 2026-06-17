@@ -12,6 +12,7 @@ class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
 class UWalletComponent;
+class UBuildComponent;
 class AOreVein;
 struct FInputActionValue;
 
@@ -39,6 +40,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Components")
 	UWalletComponent* GetWallet() const { return Wallet; }
 
+	void ServerApplyStun(float Duration);
+
+	void ServerApplySlow(float Mult, float Duration);
+
+	UFUNCTION(BlueprintPure, Category = "Ore Rush|Status")
+	bool IsStunned() const { return bStunned; }
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
@@ -55,6 +63,10 @@ protected:
 	/** Taşınan cevher (cüzdan). */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ore Rush|Components")
 	TObjectPtr<UWalletComponent> Wallet;
+
+	/** Tuzak/savunma satın alma + yerleştirme. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ore Rush|Components")
+	TObjectPtr<UBuildComponent> Build;
 
 	//~ Enhanced Input (BP'de atanır) ------------------------------------------
 	/** Gamepad/klavye context'i (IMC_Default). */
@@ -85,6 +97,14 @@ protected:
 	/** Kazma (basılı tut). IA_Mine atanır. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Input")
 	TObjectPtr<UInputAction> MineAction;
+
+	/** Tuzak yerleştir. IA_PlaceTrap atanır. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Input")
+	TObjectPtr<UInputAction> PlaceTrapAction;
+
+	/** Seçili tuzağı sıradakine geçir. IA_CycleTrap atanır. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Input")
+	TObjectPtr<UInputAction> CycleTrapAction;
 
 	/** Bakış hassasiyeti çarpanı. Kamera yavaş dönüyorsa büyüt (örn. 2-3). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Input", meta = (ClampMin = "0.0"))
@@ -124,12 +144,33 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ore Rush|Mining")
 	void OnMiningStateChanged(bool bMining);
 
+	//~ Sersemleme (tuzak) ------------------------------------------------------
+	UPROPERTY(ReplicatedUsing = OnRep_Stunned, BlueprintReadOnly, Category = "Ore Rush|Status")
+	bool bStunned = false;
+
+	UFUNCTION()
+	void OnRep_Stunned();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Ore Rush|Status")
+	void OnStunStateChanged(bool bInStunned);
+
+	/** Dış kaynaklı (tuzak) hız çarpanı. 1.0 = normal. Carry çarpanıyla çarpılır. */
+	UPROPERTY(ReplicatedUsing = OnRep_Slow, BlueprintReadOnly, Category = "Ore Rush|Status")
+	float SlowMultiplier = 1.f;
+
+	UFUNCTION()
+	void OnRep_Slow();
+
 private:
 	//~ Input handler'ları ------------------------------------------------------
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	/** Yerel: dash yönünü hesaplar ve niyeti sunucuya yollar. */
 	void DashInput();
+
+	void PlaceTrapInput();
+
+	void CycleTrapInput();
 
 	//~ Dash networking ---------------------------------------------------------
 	/** Client → Server: dash niyeti (yön world-space, normalize edilmiş). */
@@ -161,7 +202,19 @@ private:
 	UFUNCTION()
 	void UpdateCarrySpeed();
 
+	UFUNCTION(Server, Reliable)
+	void ServerPlaceTrap();
+
+	UFUNCTION(Server, Reliable)
+	void ServerCycleTrap();
+
+	void ClearStun();
+
+	void ClearSlow();
+
 	FTimerHandle MineTimerHandle;
+	FTimerHandle StunTimerHandle;
+	FTimerHandle SlowTimerHandle;
 	float BaseWalkSpeed = 500.f;
 
 	/** En son world-space hareket yönü (dash hedefleme için). */

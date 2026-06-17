@@ -58,6 +58,10 @@ public:
 	/** Server-only: cüzdanı boşalt (depoya yatırma / tuzak). Boşaltılan toplam worth döner. */
 	int32 ServerClear();
 
+	bool ServerSpendWorth(int32 Cost);
+
+	void ServerTakeAll(int32& OutIron, int32& OutGold, int32& OutDiamond);
+
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 

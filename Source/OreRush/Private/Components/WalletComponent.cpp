@@ -84,6 +84,66 @@ int32 UWalletComponent::ServerClear()
 	return Worth;
 }
 
+bool UWalletComponent::ServerSpendWorth(int32 Cost)
+{
+	if (GetOwnerRole() != ROLE_Authority)
+	{
+		return false;
+	}
+	if (Cost <= 0)
+	{
+		return true;
+	}
+	if (GetTotalWorth() < Cost)
+	{
+		return false;
+	}
+
+	int32 Remaining = Cost;
+	while (Remaining > 0 && IronCount > 0)
+	{
+		IronCount--;
+		Remaining -= OreWorth(EOreType::Iron);
+	}
+	while (Remaining > 0 && GoldCount > 0)
+	{
+		GoldCount--;
+		Remaining -= OreWorth(EOreType::Gold);
+	}
+	while (Remaining > 0 && DiamondCount > 0)
+	{
+		DiamondCount--;
+		Remaining -= OreWorth(EOreType::Diamond);
+	}
+
+	OnRep_Wallet();
+	return true;
+}
+
+void UWalletComponent::ServerTakeAll(int32& OutIron, int32& OutGold, int32& OutDiamond)
+{
+	OutIron = 0;
+	OutGold = 0;
+	OutDiamond = 0;
+
+	if (GetOwnerRole() != ROLE_Authority)
+	{
+		return;
+	}
+
+	OutIron = IronCount;
+	OutGold = GoldCount;
+	OutDiamond = DiamondCount;
+
+	if (IronCount + GoldCount + DiamondCount > 0)
+	{
+		IronCount = 0;
+		GoldCount = 0;
+		DiamondCount = 0;
+		OnRep_Wallet();
+	}
+}
+
 void UWalletComponent::OnRep_Wallet()
 {
 	OnWalletChanged.Broadcast();

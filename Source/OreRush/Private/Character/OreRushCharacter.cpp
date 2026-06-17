@@ -13,6 +13,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Components/WalletComponent.h"
+#include "Components/BuildComponent.h"
 #include "Ore/OreVein.h"
 #include "CollisionQueryParams.h"
 #include "TimerManager.h"
@@ -54,6 +55,8 @@ AOreRushCharacter::AOreRushCharacter()
 
 	// Cüzdan (taşınan cevher — replicated bileşen).
 	Wallet = CreateDefaultSubobject<UWalletComponent>(TEXT("Wallet"));
+
+	Build = CreateDefaultSubobject<UBuildComponent>(TEXT("Build"));
 }
 
 void AOreRushCharacter::BeginPlay()
@@ -121,12 +124,20 @@ void AOreRushCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 			EIC->BindAction(MineAction, ETriggerEvent::Started, this, &AOreRushCharacter::StartMine);
 			EIC->BindAction(MineAction, ETriggerEvent::Completed, this, &AOreRushCharacter::StopMine);
 		}
+		if (PlaceTrapAction)
+		{
+			EIC->BindAction(PlaceTrapAction, ETriggerEvent::Started, this, &AOreRushCharacter::PlaceTrapInput);
+		}
+		if (CycleTrapAction)
+		{
+			EIC->BindAction(CycleTrapAction, ETriggerEvent::Started, this, &AOreRushCharacter::CycleTrapInput);
+		}
 	}
 }
 
 void AOreRushCharacter::Move(const FInputActionValue& Value)
 {
-	if (bIsMining)
+	if (bIsMining || bStunned)
 	{
 		return;
 	}
@@ -165,6 +176,11 @@ void AOreRushCharacter::Look(const FInputActionValue& Value)
 
 void AOreRushCharacter::DashInput()
 {
+	if (bStunned)
+	{
+		return;
+	}
+
 	// Yerel tahmini cooldown kapısı: sunucuyu boş yere spam'lemez, HUD'ı besler.
 	const float Now = GetWorld()->GetTimeSeconds();
 	if (Now - LastDashRequestTime < DashCooldown)
@@ -344,10 +360,95 @@ void AOreRushCharacter::OnRep_IsMining()
 
 void AOreRushCharacter::UpdateCarrySpeed()
 {
-	if (Wallet)
+	const float CarryMult = Wallet ? Wallet->GetSpeedMultiplier() : 1.f;
+	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed * CarryMult * SlowMultiplier;
+}
+
+void AOreRushCharacter::PlaceTrapInput()
+{
+	ServerPlaceTrap();
+}
+
+void AOreRushCharacter::ServerPlaceTrap_Implementation()
+{
+	if (Build)
 	{
-		GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed * Wallet->GetSpeedMultiplier();
+		Build->ServerTryPlace(Build->GetSelectedIndex());
 	}
+}
+
+void AOreRushCharacter::CycleTrapInput()
+{
+	ServerCycleTrap();
+}
+
+void AOreRushCharacter::ServerCycleTrap_Implementation()
+{
+	if (Build)
+	{
+		Build->ServerCycleSelection();
+	}
+}
+
+void AOreRushCharacter::ServerApplyStun(float Duration)
+{
+	if (!HasAuthority() || Duration <= 0.f)
+	{
+		return;
+	}
+
+	bStunned = true;
+	OnRep_Stunned();
+	GetWorldTimerManager().SetTimer(StunTimerHandle, this, &AOreRushCharacter::ClearStun, Duration, false);
+}
+
+void AOreRushCharacter::ClearStun()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	bStunned = false;
+	OnRep_Stunned();
+}
+
+void AOreRushCharacter::OnRep_Stunned()
+{
+	if (bStunned)
+	{
+		GetCharacterMovement()->StopMovementImmediately();
+	}
+
+	OnStunStateChanged(bStunned);
+}
+
+void AOreRushCharacter::ServerApplySlow(float Mult, float Duration)
+{
+	if (!HasAuthority() || Duration <= 0.f)
+	{
+		return;
+	}
+
+	SlowMultiplier = FMath::Clamp(Mult, 0.1f, 1.f);
+	OnRep_Slow();
+	GetWorldTimerManager().SetTimer(SlowTimerHandle, this, &AOreRushCharacter::ClearSlow, Duration, false);
+}
+
+void AOreRushCharacter::ClearSlow()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	SlowMultiplier = 1.f;
+	OnRep_Slow();
+}
+
+void AOreRushCharacter::OnRep_Slow()
+{
+	UpdateCarrySpeed();
 }
 
 void AOreRushCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -355,4 +456,6 @@ void AOreRushCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AOreRushCharacter, bIsMining);
+	DOREPLIFETIME(AOreRushCharacter, bStunned);
+	DOREPLIFETIME(AOreRushCharacter, SlowMultiplier);
 }
