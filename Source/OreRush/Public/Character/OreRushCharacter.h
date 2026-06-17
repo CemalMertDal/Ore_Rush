@@ -57,6 +57,21 @@ public:
 
 	float GetMiningSpeedMultiplier() const { return MiningSpeedMultiplier; }
 
+	void ServerApplyReveal(float Duration);
+
+	UFUNCTION(BlueprintPure, Category = "Ore Rush|Status")
+	bool IsRevealActive() const { return bRevealActive; }
+
+	/** Rakip karakteri döndür (reveal marker / HUD için). */
+	UFUNCTION(BlueprintPure, Category = "Ore Rush|Status")
+	AOreRushCharacter* GetEnemyCharacter() const;
+
+	UFUNCTION(BlueprintPure, Category = "Ore Rush|Status")
+	float GetShieldRemaining() const;
+
+	UFUNCTION(BlueprintPure, Category = "Ore Rush|Status")
+	float GetSpeedBuffRemaining() const;
+
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Status")
 	bool IsStunned() const { return bStunned; }
 
@@ -191,6 +206,16 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ore Rush|Status")
 	void OnShieldStateChanged(bool bInShielded);
 
+	/** Reveal buff aktif (rakibi görme). */
+	UPROPERTY(ReplicatedUsing = OnRep_Reveal, BlueprintReadOnly, Category = "Ore Rush|Status")
+	bool bRevealActive = false;
+
+	UFUNCTION()
+	void OnRep_Reveal();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Ore Rush|Status")
+	void OnRevealStateChanged(bool bInRevealActive);
+
 private:
 	//~ Input handler'ları ------------------------------------------------------
 	void Move(const FInputActionValue& Value);
@@ -245,6 +270,7 @@ private:
 	void ClearSpeedBuff();
 	void ClearMiningBuff();
 	void ClearShield();
+	void ClearReveal();
 
 	float MiningSpeedMultiplier = 1.f;
 
@@ -256,6 +282,7 @@ private:
 	FTimerHandle SpeedBuffTimerHandle;
 	FTimerHandle MiningBuffTimerHandle;
 	FTimerHandle ShieldTimerHandle;
+	FTimerHandle RevealTimerHandle;
 	float BaseWalkSpeed = 500.f;
 
 	/** En son world-space hareket yönü (dash hedefleme için). */

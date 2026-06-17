@@ -40,6 +40,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Defense", meta = (ClampMin = "0.0"))
 	float ArmDelay = 0.5f;
 
+	/** Otomatik yok olma süresi (saniye). 0 = sınırsız. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Defense", meta = (ClampMin = "0.0"))
+	float Lifetime = 45.f;
+
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastDefenseFX();
 

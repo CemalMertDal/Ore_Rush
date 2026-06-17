@@ -31,6 +31,18 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Build")
 	int32 GetSelectedIndex() const { return SelectedIndex; }
 
+	UFUNCTION(BlueprintPure, Category = "Ore Rush|Build")
+	FString GetSelectedName() const;
+
+	UFUNCTION(BlueprintPure, Category = "Ore Rush|Build")
+	int32 GetSelectedCost() const;
+
+	UFUNCTION(BlueprintPure, Category = "Ore Rush|Build")
+	int32 GetActivePlacedCount() const;
+
+	UFUNCTION(BlueprintPure, Category = "Ore Rush|Build")
+	int32 GetActiveLimit() const { return ActiveTrapLimit; }
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Build")
 	TArray<FTrapCatalogEntry> Catalog;
 

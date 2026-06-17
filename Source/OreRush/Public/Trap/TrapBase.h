@@ -37,6 +37,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Trap", meta = (ClampMin = "0.0"))
 	float ArmDelay = 0.5f;
 
+	/** Tetiklenmezse otomatik yok olma süresi (saniye). 0 = sınırsız. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Trap", meta = (ClampMin = "0.0"))
+	float Lifetime = 30.f;
+
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastTriggerFX();
 

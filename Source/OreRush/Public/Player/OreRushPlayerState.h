@@ -23,6 +23,12 @@ public:
 	/** Server-only: oyuncunun takımını ayarla (GameMode tarafından çağrılır). */
 	void SetTeam(ETeam NewTeam);
 
+	UFUNCTION(BlueprintPure, Category = "Ore Rush|Cosmetic")
+	uint8 GetColorIndex() const { return ColorIndex; }
+
+	/** Server-only: kozmetik renk index'i (menüden seçilir). */
+	void SetColorIndex(uint8 NewIndex);
+
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -35,4 +41,13 @@ protected:
 	/** UI/kozmetik hook (renk vb.). Mantık değil. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ore Rush|Team")
 	void OnTeamChanged();
+
+	UPROPERTY(ReplicatedUsing = OnRep_Cosmetic, BlueprintReadOnly, Category = "Ore Rush|Cosmetic")
+	uint8 ColorIndex = 0;
+
+	UFUNCTION()
+	void OnRep_Cosmetic();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Ore Rush|Cosmetic")
+	void OnCosmeticChanged();
 };

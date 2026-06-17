@@ -19,9 +19,26 @@ void AOreRushPlayerState::OnRep_Team()
 	OnTeamChanged();
 }
 
+void AOreRushPlayerState::SetColorIndex(uint8 NewIndex)
+{
+	if (!HasAuthority() || ColorIndex == NewIndex)
+	{
+		return;
+	}
+
+	ColorIndex = NewIndex;
+	OnRep_Cosmetic();
+}
+
+void AOreRushPlayerState::OnRep_Cosmetic()
+{
+	OnCosmeticChanged();
+}
+
 void AOreRushPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AOreRushPlayerState, Team);
+	DOREPLIFETIME(AOreRushPlayerState, ColorIndex);
 }

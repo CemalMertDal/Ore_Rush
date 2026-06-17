@@ -15,9 +15,11 @@
 #include "Components/WalletComponent.h"
 #include "Components/BuildComponent.h"
 #include "Ore/OreVein.h"
+#include "Player/OreRushPlayerState.h"
 #include "CollisionQueryParams.h"
 #include "TimerManager.h"
 #include "Net/UnrealNetwork.h"
+#include "EngineUtils.h"
 
 AOreRushCharacter::AOreRushCharacter()
 {
@@ -529,6 +531,78 @@ void AOreRushCharacter::OnRep_Shield()
 	OnShieldStateChanged(bShielded);
 }
 
+void AOreRushCharacter::ServerApplyReveal(float Duration)
+{
+	if (!HasAuthority() || Duration <= 0.f)
+	{
+		return;
+	}
+
+	bRevealActive = true;
+	OnRep_Reveal();
+	GetWorldTimerManager().SetTimer(RevealTimerHandle, this, &AOreRushCharacter::ClearReveal, Duration, false);
+}
+
+void AOreRushCharacter::ClearReveal()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	bRevealActive = false;
+	OnRep_Reveal();
+}
+
+void AOreRushCharacter::OnRep_Reveal()
+{
+	OnRevealStateChanged(bRevealActive);
+}
+
+AOreRushCharacter* AOreRushCharacter::GetEnemyCharacter() const
+{
+	ETeam MyTeam = ETeam::None;
+	if (const AOreRushPlayerState* PS = GetPlayerState<AOreRushPlayerState>())
+	{
+		MyTeam = PS->GetTeam();
+	}
+
+	const UWorld* World = GetWorld();
+	if (World == nullptr)
+	{
+		return nullptr;
+	}
+
+	for (TActorIterator<AOreRushCharacter> It(World); It; ++It)
+	{
+		AOreRushCharacter* Other = *It;
+		if (Other == this)
+		{
+			continue;
+		}
+		ETeam OtherTeam = ETeam::None;
+		if (const AOreRushPlayerState* OPS = Other->GetPlayerState<AOreRushPlayerState>())
+		{
+			OtherTeam = OPS->GetTeam();
+		}
+		if (OtherTeam != ETeam::None && OtherTeam != MyTeam)
+		{
+			return Other;
+		}
+	}
+	return nullptr;
+}
+
+float AOreRushCharacter::GetShieldRemaining() const
+{
+	return FMath::Max(0.f, GetWorldTimerManager().GetTimerRemaining(ShieldTimerHandle));
+}
+
+float AOreRushCharacter::GetSpeedBuffRemaining() const
+{
+	return FMath::Max(0.f, GetWorldTimerManager().GetTimerRemaining(SpeedBuffTimerHandle));
+}
+
 void AOreRushCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -538,4 +612,5 @@ void AOreRushCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AOreRushCharacter, SlowMultiplier);
 	DOREPLIFETIME(AOreRushCharacter, BuffSpeedMultiplier);
 	DOREPLIFETIME(AOreRushCharacter, bShielded);
+	DOREPLIFETIME(AOreRushCharacter, bRevealActive);
 }

@@ -40,6 +40,11 @@ void ATrapBase::BeginPlay()
 	{
 		Trigger->OnComponentBeginOverlap.AddDynamic(this, &ATrapBase::OnTriggerOverlap);
 		GetWorldTimerManager().SetTimer(ArmTimerHandle, this, &ATrapBase::Arm, FMath::Max(0.01f, ArmDelay), false);
+
+		if (Lifetime > 0.f)
+		{
+			SetLifeSpan(Lifetime);
+		}
 	}
 }
 

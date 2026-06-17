@@ -60,6 +60,33 @@ void UBuildComponent::ServerCycleSelection()
 	}
 }
 
+FString UBuildComponent::GetSelectedName() const
+{
+	if (!Catalog.IsValidIndex(SelectedIndex) || !Catalog[SelectedIndex].PlaceableClass)
+	{
+		return TEXT("None");
+	}
+	return Catalog[SelectedIndex].PlaceableClass->GetName();
+}
+
+int32 UBuildComponent::GetSelectedCost() const
+{
+	return Catalog.IsValidIndex(SelectedIndex) ? Catalog[SelectedIndex].Cost : 0;
+}
+
+int32 UBuildComponent::GetActivePlacedCount() const
+{
+	int32 Count = 0;
+	for (const TWeakObjectPtr<AActor>& Placed : PlacedTraps)
+	{
+		if (Placed.IsValid())
+		{
+			Count++;
+		}
+	}
+	return Count;
+}
+
 void UBuildComponent::OnRep_Selected()
 {
 	if (GEngine == nullptr || !Catalog.IsValidIndex(SelectedIndex))

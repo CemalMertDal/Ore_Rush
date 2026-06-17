@@ -38,6 +38,11 @@ void ADefenseBase::BeginPlay()
 	{
 		Range->OnComponentBeginOverlap.AddDynamic(this, &ADefenseBase::OnRangeOverlap);
 		GetWorldTimerManager().SetTimer(ArmTimerHandle, this, &ADefenseBase::Arm, FMath::Max(0.01f, ArmDelay), false);
+
+		if (Lifetime > 0.f)
+		{
+			SetLifeSpan(Lifetime);
+		}
 	}
 }
 
