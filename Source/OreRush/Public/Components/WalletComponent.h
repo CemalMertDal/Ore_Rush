@@ -46,7 +46,10 @@ public:
 	int32 GetTotalWorth() const;
 
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Wallet")
-	bool IsFull() const { return GetTotalUnits() >= Capacity; }
+	int32 GetEffectiveCapacity() const { return Capacity + BonusCapacity; }
+
+	UFUNCTION(BlueprintPure, Category = "Ore Rush|Wallet")
+	bool IsFull() const { return GetTotalUnits() >= GetEffectiveCapacity(); }
 
 	/** Yüke göre hız çarpanı (1.0 → FullSpeedMultiplier). */
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Wallet")
@@ -62,6 +65,9 @@ public:
 
 	void ServerTakeAll(int32& OutIron, int32& OutGold, int32& OutDiamond);
 
+	/** Server-only: süreli taşıma kapasitesi bonusu (capacity power-up). */
+	void ServerApplyCapacityBonus(int32 Amount, float Duration);
+
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -74,9 +80,16 @@ protected:
 	UPROPERTY(ReplicatedUsing = OnRep_Wallet, BlueprintReadOnly, Category = "Ore Rush|Wallet")
 	int32 DiamondCount = 0;
 
+	UPROPERTY(ReplicatedUsing = OnRep_Wallet, BlueprintReadOnly, Category = "Ore Rush|Wallet")
+	int32 BonusCapacity = 0;
+
 	UFUNCTION()
 	void OnRep_Wallet();
 
 private:
+	void ClearCapacityBonus();
+
 	int32* CountPtr(EOreType Type);
+
+	FTimerHandle CapacityTimerHandle;
 };

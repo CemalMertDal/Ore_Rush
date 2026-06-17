@@ -2,6 +2,8 @@
 
 #include "Components/WalletComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "TimerManager.h"
+#include "Engine/World.h"
 
 UWalletComponent::UWalletComponent()
 {
@@ -40,11 +42,12 @@ int32 UWalletComponent::GetTotalWorth() const
 
 float UWalletComponent::GetSpeedMultiplier() const
 {
-	if (Capacity <= 0)
+	const int32 EffCap = GetEffectiveCapacity();
+	if (EffCap <= 0)
 	{
 		return 1.f;
 	}
-	const float Load = FMath::Clamp(static_cast<float>(GetTotalUnits()) / Capacity, 0.f, 1.f);
+	const float Load = FMath::Clamp(static_cast<float>(GetTotalUnits()) / EffCap, 0.f, 1.f);
 	return FMath::Lerp(1.f, FullSpeedMultiplier, Load);
 }
 
@@ -144,6 +147,32 @@ void UWalletComponent::ServerTakeAll(int32& OutIron, int32& OutGold, int32& OutD
 	}
 }
 
+void UWalletComponent::ServerApplyCapacityBonus(int32 Amount, float Duration)
+{
+	if (GetOwnerRole() != ROLE_Authority || Amount <= 0 || Duration <= 0.f)
+	{
+		return;
+	}
+
+	BonusCapacity = Amount;
+	OnRep_Wallet();
+
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().SetTimer(CapacityTimerHandle, this, &UWalletComponent::ClearCapacityBonus, Duration, false);
+	}
+}
+
+void UWalletComponent::ClearCapacityBonus()
+{
+	if (GetOwnerRole() != ROLE_Authority)
+	{
+		return;
+	}
+	BonusCapacity = 0;
+	OnRep_Wallet();
+}
+
 void UWalletComponent::OnRep_Wallet()
 {
 	OnWalletChanged.Broadcast();
@@ -156,4 +185,5 @@ void UWalletComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UWalletComponent, IronCount);
 	DOREPLIFETIME(UWalletComponent, GoldCount);
 	DOREPLIFETIME(UWalletComponent, DiamondCount);
+	DOREPLIFETIME(UWalletComponent, BonusCapacity);
 }

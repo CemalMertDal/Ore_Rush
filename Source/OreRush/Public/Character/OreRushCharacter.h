@@ -48,6 +48,15 @@ public:
 	/** Etkileşilen aktör (damar/depo) etkileşimi kendiliğinden bitirince çağırır. */
 	void NotifyInteractFinished(UObject* Source);
 
+	void ServerApplySpeedBuff(float Mult, float Duration);
+	void ServerApplyMiningBuff(float Mult, float Duration);
+	void ServerApplyShield(float Duration);
+
+	UFUNCTION(BlueprintPure, Category = "Ore Rush|Status")
+	bool IsShielded() const { return bShielded; }
+
+	float GetMiningSpeedMultiplier() const { return MiningSpeedMultiplier; }
+
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Status")
 	bool IsStunned() const { return bStunned; }
 
@@ -165,6 +174,23 @@ protected:
 	UFUNCTION()
 	void OnRep_Slow();
 
+	/** Power-up hız buff çarpanı. 1.0 = normal, >1 = hızlı. */
+	UPROPERTY(ReplicatedUsing = OnRep_SpeedBuff, BlueprintReadOnly, Category = "Ore Rush|Status")
+	float BuffSpeedMultiplier = 1.f;
+
+	UFUNCTION()
+	void OnRep_SpeedBuff();
+
+	/** Tuzak bağışıklığı (shield power-up). */
+	UPROPERTY(ReplicatedUsing = OnRep_Shield, BlueprintReadOnly, Category = "Ore Rush|Status")
+	bool bShielded = false;
+
+	UFUNCTION()
+	void OnRep_Shield();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Ore Rush|Status")
+	void OnShieldStateChanged(bool bInShielded);
+
 private:
 	//~ Input handler'ları ------------------------------------------------------
 	void Move(const FInputActionValue& Value);
@@ -216,11 +242,20 @@ private:
 
 	void ClearSlow();
 
+	void ClearSpeedBuff();
+	void ClearMiningBuff();
+	void ClearShield();
+
+	float MiningSpeedMultiplier = 1.f;
+
 	UPROPERTY()
 	TScriptInterface<IOreRushInteractable> CurrentInteractable;
 
 	FTimerHandle StunTimerHandle;
 	FTimerHandle SlowTimerHandle;
+	FTimerHandle SpeedBuffTimerHandle;
+	FTimerHandle MiningBuffTimerHandle;
+	FTimerHandle ShieldTimerHandle;
 	float BaseWalkSpeed = 500.f;
 
 	/** En son world-space hareket yönü (dash hedefleme için). */

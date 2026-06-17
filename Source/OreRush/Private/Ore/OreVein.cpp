@@ -39,7 +39,7 @@ void AOreVein::ServerStartInteract(AOreRushCharacter* User)
 
 	CurrentMiner = User;
 
-	const float Interval = FMath::Max(0.05f, MineTime);
+	const float Interval = FMath::Max(0.05f, MineTime * User->GetMiningSpeedMultiplier());
 	GetWorldTimerManager().SetTimer(MineTimerHandle, this, &AOreVein::MineTick, Interval, true, Interval);
 }
 

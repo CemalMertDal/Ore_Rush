@@ -81,6 +81,11 @@ void ATrapBase::OnTriggerOverlap(UPrimitiveComponent* OverlappedComp, AActor* Ot
 		return;
 	}
 
+	if (Victim->IsShielded())
+	{
+		return;
+	}
+
 	bTriggered = true;
 	OnTriggered(Victim);
 	MulticastTriggerFX();

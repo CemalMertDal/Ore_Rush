@@ -362,7 +362,7 @@ void AOreRushCharacter::OnRep_IsMining()
 void AOreRushCharacter::UpdateCarrySpeed()
 {
 	const float CarryMult = Wallet ? Wallet->GetSpeedMultiplier() : 1.f;
-	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed * CarryMult * SlowMultiplier;
+	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed * CarryMult * SlowMultiplier * BuffSpeedMultiplier;
 }
 
 void AOreRushCharacter::PlaceTrapInput()
@@ -452,6 +452,83 @@ void AOreRushCharacter::OnRep_Slow()
 	UpdateCarrySpeed();
 }
 
+void AOreRushCharacter::ServerApplySpeedBuff(float Mult, float Duration)
+{
+	if (!HasAuthority() || Duration <= 0.f)
+	{
+		return;
+	}
+
+	BuffSpeedMultiplier = FMath::Max(0.1f, Mult);
+	OnRep_SpeedBuff();
+	GetWorldTimerManager().SetTimer(SpeedBuffTimerHandle, this, &AOreRushCharacter::ClearSpeedBuff, Duration, false);
+}
+
+void AOreRushCharacter::ClearSpeedBuff()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	BuffSpeedMultiplier = 1.f;
+	OnRep_SpeedBuff();
+}
+
+void AOreRushCharacter::OnRep_SpeedBuff()
+{
+	UpdateCarrySpeed();
+}
+
+void AOreRushCharacter::ServerApplyMiningBuff(float Mult, float Duration)
+{
+	if (!HasAuthority() || Duration <= 0.f)
+	{
+		return;
+	}
+
+	MiningSpeedMultiplier = FMath::Clamp(Mult, 0.1f, 1.f);
+	GetWorldTimerManager().SetTimer(MiningBuffTimerHandle, this, &AOreRushCharacter::ClearMiningBuff, Duration, false);
+}
+
+void AOreRushCharacter::ClearMiningBuff()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	MiningSpeedMultiplier = 1.f;
+}
+
+void AOreRushCharacter::ServerApplyShield(float Duration)
+{
+	if (!HasAuthority() || Duration <= 0.f)
+	{
+		return;
+	}
+
+	bShielded = true;
+	OnRep_Shield();
+	GetWorldTimerManager().SetTimer(ShieldTimerHandle, this, &AOreRushCharacter::ClearShield, Duration, false);
+}
+
+void AOreRushCharacter::ClearShield()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	bShielded = false;
+	OnRep_Shield();
+}
+
+void AOreRushCharacter::OnRep_Shield()
+{
+	OnShieldStateChanged(bShielded);
+}
+
 void AOreRushCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -459,4 +536,6 @@ void AOreRushCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AOreRushCharacter, bIsMining);
 	DOREPLIFETIME(AOreRushCharacter, bStunned);
 	DOREPLIFETIME(AOreRushCharacter, SlowMultiplier);
+	DOREPLIFETIME(AOreRushCharacter, BuffSpeedMultiplier);
+	DOREPLIFETIME(AOreRushCharacter, bShielded);
 }
