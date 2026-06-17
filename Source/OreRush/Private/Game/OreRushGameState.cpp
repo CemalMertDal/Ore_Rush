@@ -39,6 +39,49 @@ void AOreRushGameState::AddScore(ETeam Team, int32 Amount)
 	}
 }
 
+int32 AOreRushGameState::GetScore(ETeam Team) const
+{
+	if (Team == ETeam::Red)
+	{
+		return RedScore;
+	}
+	if (Team == ETeam::Blue)
+	{
+		return BlueScore;
+	}
+	return 0;
+}
+
+int32 AOreRushGameState::RemoveScore(ETeam Team, int32 Amount)
+{
+	if (!HasAuthority() || Amount <= 0 || bMatchEnded)
+	{
+		return 0;
+	}
+
+	int32* Score = nullptr;
+	if (Team == ETeam::Red)
+	{
+		Score = &RedScore;
+	}
+	else if (Team == ETeam::Blue)
+	{
+		Score = &BlueScore;
+	}
+	if (Score == nullptr)
+	{
+		return 0;
+	}
+
+	const int32 Removed = FMath::Min(Amount, *Score);
+	if (Removed > 0)
+	{
+		*Score -= Removed;
+		OnRep_Scores();
+	}
+	return Removed;
+}
+
 void AOreRushGameState::EndMatch(ETeam InWinningTeam)
 {
 	if (!HasAuthority() || bMatchEnded)

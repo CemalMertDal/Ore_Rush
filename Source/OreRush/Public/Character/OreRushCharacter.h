@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Interaction/OreRushInteractable.h"
 #include "OreRushCharacter.generated.h"
 
 class USpringArmComponent;
@@ -43,6 +44,9 @@ public:
 	void ServerApplyStun(float Duration);
 
 	void ServerApplySlow(float Mult, float Duration);
+
+	/** Etkileşilen aktör (damar/depo) etkileşimi kendiliğinden bitirince çağırır. */
+	void NotifyInteractFinished(UObject* Source);
 
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Status")
 	bool IsStunned() const { return bStunned; }
@@ -181,22 +185,22 @@ private:
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastDashFX();
 
-	//~ Kazma networking --------------------------------------------------------
-	/** Yerel input: kazmayı başlat/bitir → niyeti sunucuya yolla. */
-	void StartMine();
-	void StopMine();
+	//~ Etkileşim networking ----------------------------------------------------
+	/** Yerel input: etkileşimi başlat/bitir (kaz / baskın) → niyeti sunucuya yolla. */
+	void StartInteract();
+	void StopInteract();
 
 	UFUNCTION(Server, Reliable)
-	void ServerStartMine();
+	void ServerStartInteract();
 
 	UFUNCTION(Server, Reliable)
-	void ServerStopMine();
+	void ServerStopInteract();
 
-	/** Server: MineTime aralığıyla çağrılır — bakılan damardan 1 birim çıkar. */
-	void MineTick();
+	/** Server: mevcut etkileşimi sonlandır (kullanıcı bıraktı). */
+	void StopCurrentInteract();
 
-	/** Kameradan ileri trace ile bakılan damarı bul (sunucu). */
-	AOreVein* TraceForVein() const;
+	/** Kameradan ileri trace ile bakılan etkileşilebilir aktörü bul (sunucu). */
+	AActor* TraceForInteractable() const;
 
 	/** Cüzdan yüküne göre yürüme hızını güncelle (RepNotify ile her makinede). */
 	UFUNCTION()
@@ -212,7 +216,9 @@ private:
 
 	void ClearSlow();
 
-	FTimerHandle MineTimerHandle;
+	UPROPERTY()
+	TScriptInterface<IOreRushInteractable> CurrentInteractable;
+
 	FTimerHandle StunTimerHandle;
 	FTimerHandle SlowTimerHandle;
 	float BaseWalkSpeed = 500.f;

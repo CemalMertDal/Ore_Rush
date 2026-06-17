@@ -4,6 +4,10 @@
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "TimerManager.h"
+#include "Engine/World.h"
+#include "Character/OreRushCharacter.h"
+#include "Components/WalletComponent.h"
 
 AOreVein::AOreVein()
 {
@@ -19,6 +23,65 @@ AOreVein::AOreVein()
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(InteractBox);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+bool AOreVein::CanInteract(AOreRushCharacter* User) const
+{
+	return User != nullptr && CanBeMined();
+}
+
+void AOreVein::ServerStartInteract(AOreRushCharacter* User)
+{
+	if (!HasAuthority() || User == nullptr || !CanBeMined())
+	{
+		return;
+	}
+
+	CurrentMiner = User;
+
+	const float Interval = FMath::Max(0.05f, MineTime);
+	GetWorldTimerManager().SetTimer(MineTimerHandle, this, &AOreVein::MineTick, Interval, true, Interval);
+}
+
+void AOreVein::ServerStopInteract(AOreRushCharacter* User)
+{
+	if (CurrentMiner.Get() == User)
+	{
+		GetWorldTimerManager().ClearTimer(MineTimerHandle);
+		CurrentMiner = nullptr;
+	}
+}
+
+void AOreVein::MineTick()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	AOreRushCharacter* Miner = CurrentMiner.Get();
+	if (Miner == nullptr || !CanBeMined())
+	{
+		GetWorldTimerManager().ClearTimer(MineTimerHandle);
+		if (Miner)
+		{
+			Miner->NotifyInteractFinished(this);
+		}
+		CurrentMiner = nullptr;
+		return;
+	}
+
+	UWalletComponent* Wallet = Miner->GetWallet();
+	if (Wallet == nullptr || Wallet->IsFull())
+	{
+		return;
+	}
+
+	const EOreType Extracted = ServerExtractOne();
+	if (Extracted != EOreType::None)
+	{
+		Wallet->ServerAddOre(Extracted);
+	}
 }
 
 EOreType AOreVein::ServerExtractOne()
@@ -55,6 +118,13 @@ void AOreVein::Deplete()
 {
 	bDepleted = true;
 	SetActorEnableCollision(false);
+
+	GetWorldTimerManager().ClearTimer(MineTimerHandle);
+	if (AOreRushCharacter* Miner = CurrentMiner.Get())
+	{
+		Miner->NotifyInteractFinished(this);
+	}
+	CurrentMiner = nullptr;
 
 	// Multicast/RepNotify'ın client'lara ulaşması için kısa gecikmeyle yok et.
 	SetLifeSpan(0.2f);

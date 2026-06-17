@@ -4,15 +4,13 @@
 #include "Components/ActorComponent.h"
 #include "BuildComponent.generated.h"
 
-class ATrapBase;
-
 USTRUCT(BlueprintType)
 struct FTrapCatalogEntry
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Build")
-	TSubclassOf<ATrapBase> TrapClass;
+	TSubclassOf<AActor> PlaceableClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Build", meta = (ClampMin = "0"))
 	int32 Cost = 3;
@@ -54,7 +52,7 @@ protected:
 private:
 	void PrunePlaced();
 
-	TArray<TWeakObjectPtr<ATrapBase>> PlacedTraps;
+	TArray<TWeakObjectPtr<AActor>> PlacedTraps;
 	float LastPlaceTime = -1000.f;
 
 	UPROPERTY(ReplicatedUsing = OnRep_Selected)

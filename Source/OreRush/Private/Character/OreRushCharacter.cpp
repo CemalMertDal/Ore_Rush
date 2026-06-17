@@ -120,9 +120,9 @@ void AOreRushCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		}
 		if (MineAction)
 		{
-			// Basılı tut: Started → kazmaya başla, Completed → bırak.
-			EIC->BindAction(MineAction, ETriggerEvent::Started, this, &AOreRushCharacter::StartMine);
-			EIC->BindAction(MineAction, ETriggerEvent::Completed, this, &AOreRushCharacter::StopMine);
+			// Basılı tut: Started → etkileşimi başlat (kaz/baskın), Completed → bırak.
+			EIC->BindAction(MineAction, ETriggerEvent::Started, this, &AOreRushCharacter::StartInteract);
+			EIC->BindAction(MineAction, ETriggerEvent::Completed, this, &AOreRushCharacter::StopInteract);
 		}
 		if (PlaceTrapAction)
 		{
@@ -252,42 +252,59 @@ float AOreRushCharacter::GetDashCooldownRemaining() const
 	return FMath::Max(0.f, DashCooldown - Elapsed);
 }
 
-//~ Kazma (mining) --------------------------------------------------------------
+//~ Etkileşim (kaz / baskın) ----------------------------------------------------
 
-void AOreRushCharacter::StartMine()
+void AOreRushCharacter::StartInteract()
 {
-	ServerStartMine();
+	ServerStartInteract();
 }
 
-void AOreRushCharacter::StopMine()
+void AOreRushCharacter::StopInteract()
 {
-	ServerStopMine();
+	ServerStopInteract();
 }
 
-void AOreRushCharacter::ServerStartMine_Implementation()
+void AOreRushCharacter::ServerStartInteract_Implementation()
 {
-	if (bIsMining)
+	if (bIsMining || bStunned)
 	{
 		return;
 	}
 
-	// Başlatmak için bir damara bakıyor olmalı (geri bildirim + MineTime'ı al).
-	AOreVein* Vein = TraceForVein();
-	if (Vein == nullptr || !Vein->CanBeMined())
+	AActor* HitActor = TraceForInteractable();
+	if (HitActor == nullptr)
 	{
 		return;
 	}
+
+	IOreRushInteractable* Interactable = Cast<IOreRushInteractable>(HitActor);
+	if (Interactable == nullptr || !Interactable->CanInteract(this))
+	{
+		return;
+	}
+
+	CurrentInteractable.SetObject(HitActor);
+	CurrentInteractable.SetInterface(Interactable);
 
 	bIsMining = true;
-	OnRep_IsMining(); // sunucuda da tetikle
+	OnRep_IsMining();
 
-	const float Interval = FMath::Max(0.05f, Vein->MineTime);
-	GetWorldTimerManager().SetTimer(MineTimerHandle, this, &AOreRushCharacter::MineTick, Interval, true, Interval);
+	Interactable->ServerStartInteract(this);
 }
 
-void AOreRushCharacter::ServerStopMine_Implementation()
+void AOreRushCharacter::ServerStopInteract_Implementation()
 {
-	GetWorldTimerManager().ClearTimer(MineTimerHandle);
+	StopCurrentInteract();
+}
+
+void AOreRushCharacter::StopCurrentInteract()
+{
+	if (CurrentInteractable)
+	{
+		CurrentInteractable->ServerStopInteract(this);
+	}
+	CurrentInteractable = nullptr;
+
 	if (bIsMining)
 	{
 		bIsMining = false;
@@ -295,37 +312,22 @@ void AOreRushCharacter::ServerStopMine_Implementation()
 	}
 }
 
-void AOreRushCharacter::MineTick()
+void AOreRushCharacter::NotifyInteractFinished(UObject* Source)
 {
-	if (!HasAuthority())
+	if (CurrentInteractable.GetObject() != Source)
 	{
 		return;
 	}
 
-	// Hâlâ kazılabilir bir damara bakıyor mu?
-	AOreVein* Vein = TraceForVein();
-	if (Vein == nullptr || !Vein->CanBeMined())
+	CurrentInteractable = nullptr;
+	if (bIsMining)
 	{
-		GetWorldTimerManager().ClearTimer(MineTimerHandle);
 		bIsMining = false;
 		OnRep_IsMining();
-		return;
-	}
-
-	// Cüzdan doluysa birim harcamadan bekle (sınırlı cevheri ziyan etme).
-	if (Wallet && Wallet->IsFull())
-	{
-		return;
-	}
-
-	const EOreType Extracted = Vein->ServerExtractOne();
-	if (Extracted != EOreType::None && Wallet)
-	{
-		Wallet->ServerAddOre(Extracted);
 	}
 }
 
-AOreVein* AOreRushCharacter::TraceForVein() const
+AActor* AOreRushCharacter::TraceForInteractable() const
 {
 	const UWorld* World = GetWorld();
 	if (World == nullptr)
@@ -333,7 +335,6 @@ AOreVein* AOreRushCharacter::TraceForVein() const
 		return nullptr;
 	}
 
-	// Kameraya (control rotation) göre göz hizasından ileri trace.
 	const FVector Start = GetActorLocation() + FVector(0.f, 0.f, BaseEyeHeight);
 	const FVector End = Start + GetControlRotation().Vector() * MineRange;
 
@@ -343,7 +344,7 @@ AOreVein* AOreRushCharacter::TraceForVein() const
 	FHitResult Hit;
 	if (World->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params))
 	{
-		return Cast<AOreVein>(Hit.GetActor());
+		return Hit.GetActor();
 	}
 	return nullptr;
 }

@@ -4,6 +4,9 @@
 #include "Trap/MudTrap.h"
 #include "Trap/DecoyOre.h"
 #include "Trap/SmokeTrap.h"
+#include "Defense/DefenseBase.h"
+#include "Defense/Barrier.h"
+#include "Defense/Turret.h"
 #include "Components/WalletComponent.h"
 #include "Player/OreRushPlayerState.h"
 #include "GameFramework/Pawn.h"
@@ -17,10 +20,10 @@ UBuildComponent::UBuildComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 	SetIsReplicatedByDefault(true);
 
-	auto AddEntry = [this](TSubclassOf<ATrapBase> Cls, int32 Cost)
+	auto AddEntry = [this](TSubclassOf<AActor> Cls, int32 Cost)
 	{
 		FTrapCatalogEntry Entry;
-		Entry.TrapClass = Cls;
+		Entry.PlaceableClass = Cls;
 		Entry.Cost = Cost;
 		Catalog.Add(Entry);
 	};
@@ -29,6 +32,8 @@ UBuildComponent::UBuildComponent()
 	AddEntry(AMudTrap::StaticClass(), 3);
 	AddEntry(ADecoyOre::StaticClass(), 5);
 	AddEntry(ASmokeTrap::StaticClass(), 2);
+	AddEntry(ABarrier::StaticClass(), 3);
+	AddEntry(ATurret::StaticClass(), 5);
 }
 
 void UBuildComponent::ServerCycleSelection()
@@ -62,7 +67,7 @@ void UBuildComponent::OnRep_Selected()
 		return;
 	}
 
-	const UClass* Cls = Catalog[SelectedIndex].TrapClass;
+	const UClass* Cls = Catalog[SelectedIndex].PlaceableClass;
 	const FString Name = Cls ? Cls->GetName() : TEXT("None");
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan,
 		FString::Printf(TEXT("Selected Trap: %s (Cost %d)"), *Name, Catalog[SelectedIndex].Cost));
@@ -76,7 +81,7 @@ void UBuildComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 
 void UBuildComponent::PrunePlaced()
 {
-	PlacedTraps.RemoveAll([](const TWeakObjectPtr<ATrapBase>& Trap) { return !Trap.IsValid(); });
+	PlacedTraps.RemoveAll([](const TWeakObjectPtr<AActor>& Placed) { return !Placed.IsValid(); });
 }
 
 void UBuildComponent::ServerTryPlace(int32 Index)
@@ -93,7 +98,7 @@ void UBuildComponent::ServerTryPlace(int32 Index)
 	}
 
 	const FTrapCatalogEntry& Entry = Catalog[Index];
-	if (!Entry.TrapClass)
+	if (!Entry.PlaceableClass)
 	{
 		return;
 	}
@@ -138,8 +143,8 @@ void UBuildComponent::ServerTryPlace(int32 Index)
 	SpawnParams.Owner = OwnerActor;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	ATrapBase* Trap = World->SpawnActor<ATrapBase>(Entry.TrapClass, SpawnLocation, FRotator::ZeroRotator, SpawnParams);
-	if (Trap == nullptr)
+	AActor* Spawned = World->SpawnActor<AActor>(Entry.PlaceableClass, SpawnLocation, FRotator::ZeroRotator, SpawnParams);
+	if (Spawned == nullptr)
 	{
 		return;
 	}
@@ -154,8 +159,16 @@ void UBuildComponent::ServerTryPlace(int32 Index)
 			Team = PS->GetTeam();
 		}
 	}
-	Trap->ServerInit(Team);
 
-	PlacedTraps.Add(Trap);
+	if (ATrapBase* Trap = Cast<ATrapBase>(Spawned))
+	{
+		Trap->ServerInit(Team);
+	}
+	else if (ADefenseBase* Defense = Cast<ADefenseBase>(Spawned))
+	{
+		Defense->ServerInit(Team);
+	}
+
+	PlacedTraps.Add(Spawned);
 	LastPlaceTime = Now;
 }

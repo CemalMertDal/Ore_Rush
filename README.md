@@ -70,7 +70,7 @@ Source/OreRush/
 - [x] Depot + vault + score
 - [x] GameMode + quota + win condition
 - [x] Economy + traps
-- [ ] Depot raiding + defenses
+- [x] Depot raiding + defenses
 - [ ] Power-ups
 - [ ] Procedural map generation
 - [ ] UI (menu / HUD / tutorial / end screen)
@@ -85,3 +85,4 @@ Source/OreRush/
 - **17/06/2026** — Added match flow: automatic team assignment (host Red / joiner Blue), score quota, and win condition — the first team to fill the quota wins.
 - **17/06/2026** — Mining now holds the miner in place; movement returns when you release or finish mining.
 - **17/06/2026** — Added the economy and traps: spend wallet ore to build snare, mud, decoy, and smoke traps (server-authoritative, with placement cooldown and active limit). Snare stuns and drops your ore as a pickable, mud slows, decoy disguises as ore, smoke leaves a vision-blocking cloud.
+- **17/06/2026** — Added depot raiding and defenses: a shared interaction interface routes look-and-hold for both mining and raiding; raid an enemy vault to steal score over time, with a "busted" reversal when the owner defends. Defenses (a blocking barrier wall and a stunning turret with projectile) and nearby-defense reinforcement reduce raid losses.

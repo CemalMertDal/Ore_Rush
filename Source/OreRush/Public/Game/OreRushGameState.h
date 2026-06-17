@@ -43,6 +43,12 @@ public:
 	/** Takım skorunu artırır (yalnız sunucu). */
 	void AddScore(ETeam Team, int32 Amount);
 
+	UFUNCTION(BlueprintPure, Category = "Ore Rush|Score")
+	int32 GetScore(ETeam Team) const;
+
+	/** Server-only: kasadan miktar düşür (baskın). Gerçekte düşen miktarı döner. */
+	int32 RemoveScore(ETeam Team, int32 Amount);
+
 	void EndMatch(ETeam InWinningTeam);
 
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Match")

@@ -5,10 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Core/OreRushTypes.h"
+#include "Interaction/OreRushInteractable.h"
 #include "OreVein.generated.h"
 
 class UBoxComponent;
 class UStaticMeshComponent;
+class AOreRushCharacter;
 
 /**
  * AOreVein
@@ -17,12 +19,16 @@ class UStaticMeshComponent;
  * ServerExtractOne çağırır; sınırlı damar tükenince yok olur. Server-authoritative.
  */
 UCLASS()
-class ORERUSH_API AOreVein : public AActor
+class ORERUSH_API AOreVein : public AActor, public IOreRushInteractable
 {
 	GENERATED_BODY()
 
 public:
 	AOreVein();
+
+	virtual bool CanInteract(AOreRushCharacter* User) const override;
+	virtual void ServerStartInteract(AOreRushCharacter* User) override;
+	virtual void ServerStopInteract(AOreRushCharacter* User) override;
 
 	/** Cevher türü (worth = enum değeri). */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ore Rush|Vein")
@@ -76,5 +82,10 @@ private:
 	/** Server: damarı tüket → FX + kısa gecikmeyle yok et. */
 	void Deplete();
 
+	void MineTick();
+
 	bool bDepleted = false;
+
+	TWeakObjectPtr<AOreRushCharacter> CurrentMiner;
+	FTimerHandle MineTimerHandle;
 };

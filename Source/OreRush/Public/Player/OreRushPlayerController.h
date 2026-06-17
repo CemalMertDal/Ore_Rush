@@ -15,4 +15,12 @@ UCLASS()
 class ORERUSH_API AOreRushPlayerController : public APlayerController
 {
 	GENERATED_BODY()
+
+public:
+	UFUNCTION(Client, Reliable)
+	void ClientShowAlarm(const FString& Message);
+
+protected:
+	UFUNCTION(BlueprintImplementableEvent, Category = "Ore Rush|Alarm")
+	void OnAlarm(const FString& Message);
 };
