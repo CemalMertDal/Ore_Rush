@@ -12,7 +12,10 @@ public class OreRush : ModuleRules
             "CoreUObject",
             "Engine",
             "InputCore",
-            "EnhancedInput"
+            "EnhancedInput",
+            "UMG",
+            "OnlineSubsystem",
+            "OnlineSubsystemUtils"
         });
     }
 }

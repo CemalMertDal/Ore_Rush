@@ -30,6 +30,9 @@ public:
 	/** Tüm mevcut oyuncuları kendi takım depolarına taşır (MapGenerator üretim sonrası çağırır). */
 	void PlacePlayersAtDepots();
 
+	/** Maçı aynı haritada yeniden başlat (yeni seed). Listen server'ı korur. */
+	void RestartMatch();
+
 protected:
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 

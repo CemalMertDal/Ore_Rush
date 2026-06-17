@@ -126,6 +126,14 @@ void AOreRushGameMode::PlacePlayersAtDepots()
 	}
 }
 
+void AOreRushGameMode::RestartMatch()
+{
+	if (UWorld* World = GetWorld())
+	{
+		World->ServerTravel(TEXT("?restart"), false);
+	}
+}
+
 void AOreRushGameMode::CheckWinCondition()
 {
 	AOreRushGameState* GS = Cast<AOreRushGameState>(GameState);

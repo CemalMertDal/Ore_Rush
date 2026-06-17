@@ -20,7 +20,17 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientShowAlarm(const FString& Message);
 
+	/** Menüden seçilen kozmetik rengi sunucuya bildir. */
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "Ore Rush|Cosmetic")
+	void ServerSetColorIndex(uint8 NewIndex);
+
+	/** EndScreen "tekrar oyna" → sunucudan maçı yeniden başlat. */
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "Ore Rush|Match")
+	void ServerRequestRestart();
+
 protected:
+	virtual void BeginPlay() override;
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ore Rush|Alarm")
 	void OnAlarm(const FString& Message);
 };
