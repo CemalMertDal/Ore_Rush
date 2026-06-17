@@ -7,6 +7,8 @@
 #include "Core/OreRushTypes.h"
 #include "OreRushGameMode.generated.h"
 
+class ADepotZone;
+
 /**
  * AOreRushGameMode
  * Sunucu-otorite maç yönetimi. Şimdilik default sınıfları (pawn/controller/state) bağlar.
@@ -25,9 +27,18 @@ public:
 
 	void CheckWinCondition();
 
+	/** Tüm mevcut oyuncuları kendi takım depolarına taşır (MapGenerator üretim sonrası çağırır). */
+	void PlacePlayersAtDepots();
+
 protected:
+	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Ore Rush|Match")
 	int32 QuotaTarget = 20;
 
 	ETeam PickTeamForNewPlayer();
+
+	ADepotZone* FindDepotForTeam(ETeam Team) const;
+
+	void PlacePlayerAtDepot(APlayerController* PC);
 };
