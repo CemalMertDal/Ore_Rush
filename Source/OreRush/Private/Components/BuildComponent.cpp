@@ -98,6 +98,8 @@ void UBuildComponent::OnRep_Selected()
 	const FString Name = Cls ? Cls->GetName() : TEXT("None");
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan,
 		FString::Printf(TEXT("Selected Trap: %s (Cost %d)"), *Name, Catalog[SelectedIndex].Cost));
+
+	OnSelectionChanged.Broadcast();
 }
 
 void UBuildComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

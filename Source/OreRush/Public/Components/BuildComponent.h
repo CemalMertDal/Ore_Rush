@@ -16,6 +16,8 @@ struct FTrapCatalogEntry
 	int32 Cost = 3;
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBuildSelectionChanged);
+
 UCLASS(ClassGroup = (OreRush), meta = (BlueprintSpawnableComponent))
 class ORERUSH_API UBuildComponent : public UActorComponent
 {
@@ -23,6 +25,10 @@ class ORERUSH_API UBuildComponent : public UActorComponent
 
 public:
 	UBuildComponent();
+
+	/** Seçili tuzak değişti (HUD isim/ücret güncellemesi — Tick'e gerek yok). */
+	UPROPERTY(BlueprintAssignable, Category = "Ore Rush|Build")
+	FOnBuildSelectionChanged OnSelectionChanged;
 
 	void ServerTryPlace(int32 Index);
 

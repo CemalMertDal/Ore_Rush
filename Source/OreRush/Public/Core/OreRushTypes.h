@@ -29,3 +29,13 @@ FORCEINLINE int32 OreWorth(EOreType Type)
 {
 	return static_cast<int32>(Type);
 }
+
+/** Power-up buff türleri (HUD ikonları için). */
+UENUM(BlueprintType)
+enum class EOreRushBuff : uint8
+{
+	Speed   UMETA(DisplayName = "Speed"),
+	Mining  UMETA(DisplayName = "Mining"),
+	Shield  UMETA(DisplayName = "Shield"),
+	Reveal  UMETA(DisplayName = "Reveal")
+};

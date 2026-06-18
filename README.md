@@ -91,3 +91,4 @@ Source/OreRush/
 - **18/06/2026** — Added the reveal power-up, configurable trap/defense lifetimes, per-player cosmetic color, and HUD data getters (selected trap, active count, buff timers).
 - **18/06/2026** — Added Steam sessions (host / find / join with no IP typing, plus Steam invites) with a direct-IP/LAN fallback, and the main-menu framework (menu gamemode + controller that shows the menu and frees the cursor).
 - **18/06/2026** — Added a lobby map with a ready zone: while both players wait they can mine for fun, and once both stand in the zone a replicated 5-second countdown sends everyone to the match map.
+- **19/06/2026** — Added event-driven HUD hooks: buff icons and the selected-trap label now update via delegates (OnBuffChanged / OnSelectionChanged) instead of polling.

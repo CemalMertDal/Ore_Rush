@@ -5,8 +5,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Core/OreRushTypes.h"
 #include "Interaction/OreRushInteractable.h"
 #include "OreRushCharacter.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBuffChanged, EOreRushBuff, Buff, bool, bActive);
 
 class USpringArmComponent;
 class UCameraComponent;
@@ -71,6 +74,10 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Status")
 	float GetSpeedBuffRemaining() const;
+
+	/** Herhangi bir buff açıldı/kapandı (HUD ikonu için — Tick'e gerek yok). */
+	UPROPERTY(BlueprintAssignable, Category = "Ore Rush|Status")
+	FOnBuffChanged OnBuffChanged;
 
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Status")
 	bool IsStunned() const { return bStunned; }
@@ -215,6 +222,13 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ore Rush|Status")
 	void OnRevealStateChanged(bool bInRevealActive);
+
+	/** Mining buff aktif mi (UI için replicated; gerçek hız çarpanı server-side). */
+	UPROPERTY(ReplicatedUsing = OnRep_MiningBuff, BlueprintReadOnly, Category = "Ore Rush|Status")
+	bool bMiningBuffActive = false;
+
+	UFUNCTION()
+	void OnRep_MiningBuff();
 
 private:
 	//~ Input handler'ları ------------------------------------------------------

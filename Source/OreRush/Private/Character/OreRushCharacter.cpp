@@ -480,6 +480,7 @@ void AOreRushCharacter::ClearSpeedBuff()
 void AOreRushCharacter::OnRep_SpeedBuff()
 {
 	UpdateCarrySpeed();
+	OnBuffChanged.Broadcast(EOreRushBuff::Speed, !FMath::IsNearlyEqual(BuffSpeedMultiplier, 1.f));
 }
 
 void AOreRushCharacter::ServerApplyMiningBuff(float Mult, float Duration)
@@ -490,6 +491,8 @@ void AOreRushCharacter::ServerApplyMiningBuff(float Mult, float Duration)
 	}
 
 	MiningSpeedMultiplier = FMath::Clamp(Mult, 0.1f, 1.f);
+	bMiningBuffActive = true;
+	OnRep_MiningBuff();
 	GetWorldTimerManager().SetTimer(MiningBuffTimerHandle, this, &AOreRushCharacter::ClearMiningBuff, Duration, false);
 }
 
@@ -501,6 +504,13 @@ void AOreRushCharacter::ClearMiningBuff()
 	}
 
 	MiningSpeedMultiplier = 1.f;
+	bMiningBuffActive = false;
+	OnRep_MiningBuff();
+}
+
+void AOreRushCharacter::OnRep_MiningBuff()
+{
+	OnBuffChanged.Broadcast(EOreRushBuff::Mining, bMiningBuffActive);
 }
 
 void AOreRushCharacter::ServerApplyShield(float Duration)
@@ -529,6 +539,7 @@ void AOreRushCharacter::ClearShield()
 void AOreRushCharacter::OnRep_Shield()
 {
 	OnShieldStateChanged(bShielded);
+	OnBuffChanged.Broadcast(EOreRushBuff::Shield, bShielded);
 }
 
 void AOreRushCharacter::ServerApplyReveal(float Duration)
@@ -557,6 +568,7 @@ void AOreRushCharacter::ClearReveal()
 void AOreRushCharacter::OnRep_Reveal()
 {
 	OnRevealStateChanged(bRevealActive);
+	OnBuffChanged.Broadcast(EOreRushBuff::Reveal, bRevealActive);
 }
 
 AOreRushCharacter* AOreRushCharacter::GetEnemyCharacter() const
@@ -613,4 +625,5 @@ void AOreRushCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AOreRushCharacter, BuffSpeedMultiplier);
 	DOREPLIFETIME(AOreRushCharacter, bShielded);
 	DOREPLIFETIME(AOreRushCharacter, bRevealActive);
+	DOREPLIFETIME(AOreRushCharacter, bMiningBuffActive);
 }
