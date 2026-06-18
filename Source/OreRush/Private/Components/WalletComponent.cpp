@@ -47,19 +47,24 @@ float UWalletComponent::GetSpeedMultiplier() const
 	{
 		return 1.f;
 	}
-	const float Load = FMath::Clamp(static_cast<float>(GetTotalUnits()) / EffCap, 0.f, 1.f);
+	const float Load = FMath::Clamp(static_cast<float>(GetTotalWorth()) / EffCap, 0.f, 1.f);
 	return FMath::Lerp(1.f, FullSpeedMultiplier, Load);
 }
 
 bool UWalletComponent::ServerAddOre(EOreType Type)
 {
-	if (GetOwnerRole() != ROLE_Authority || IsFull())
+	if (GetOwnerRole() != ROLE_Authority)
 	{
 		return false;
 	}
 
 	int32* Slot = CountPtr(Type);
 	if (Slot == nullptr)
+	{
+		return false;
+	}
+
+	if (GetTotalWorth() + OreWorth(Type) > GetEffectiveCapacity())
 	{
 		return false;
 	}
@@ -117,6 +122,11 @@ bool UWalletComponent::ServerSpendWorth(int32 Cost)
 	{
 		DiamondCount--;
 		Remaining -= OreWorth(EOreType::Diamond);
+	}
+
+	if (Remaining < 0)
+	{
+		IronCount += -Remaining;
 	}
 
 	OnRep_Wallet();

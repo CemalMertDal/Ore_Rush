@@ -94,3 +94,4 @@ Source/OreRush/
 - **19/06/2026** — Added event-driven HUD hooks: buff icons and the selected-trap label now update via delegates (OnBuffChanged / OnSelectionChanged) instead of polling.
 - **19/06/2026** — Fixed online match flow: teams persist across seamless travel, players reliably spawn at their own depot (deferred retry), the lobby countdown cancels if a player leaves, and the win quota is set to 50.
 - **19/06/2026** — Fixed replication so clients see correct ore types (gold/diamond no longer look like iron), and turrets now fire on an enemy already standing in range when armed.
+- **19/06/2026** — Reworked the economy: carry capacity is now worth-based (diamonds take more space) with a stronger full-load slowdown, and spending refunds iron change instead of overpaying.

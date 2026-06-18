@@ -23,13 +23,13 @@ class ORERUSH_API UWalletComponent : public UActorComponent
 public:
 	UWalletComponent();
 
-	/** Taşıma kapasitesi (toplam birim). */
+	/** Taşıma kapasitesi (worth bazlı: demir 1, altın 2, elmas 5 yer kaplar). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Wallet", meta = (ClampMin = "1"))
-	int32 Capacity = 10;
+	int32 Capacity = 15;
 
 	/** Cüzdan tam doluyken hız çarpanı (boşken 1.0 → doluyken bu değere lerp). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Wallet", meta = (ClampMin = "0.1", ClampMax = "1.0"))
-	float FullSpeedMultiplier = 0.8f;
+	float FullSpeedMultiplier = 0.55f;
 
 	/** Cüzdan her değiştiğinde (tüm makinelerde RepNotify ile) — HUD + hız güncelleme. */
 	UPROPERTY(BlueprintAssignable, Category = "Ore Rush|Wallet")
@@ -49,7 +49,7 @@ public:
 	int32 GetEffectiveCapacity() const { return Capacity + BonusCapacity; }
 
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Wallet")
-	bool IsFull() const { return GetTotalUnits() >= GetEffectiveCapacity(); }
+	bool IsFull() const { return GetTotalWorth() >= GetEffectiveCapacity(); }
 
 	/** Yüke göre hız çarpanı (1.0 → FullSpeedMultiplier). */
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Wallet")
