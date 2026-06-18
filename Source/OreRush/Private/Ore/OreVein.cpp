@@ -147,5 +147,7 @@ void AOreVein::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(AOreVein, OreType);
+	DOREPLIFETIME(AOreVein, bUnlimited);
 	DOREPLIFETIME(AOreVein, RemainingUnits);
 }

@@ -31,11 +31,11 @@ public:
 	virtual void ServerStopInteract(AOreRushCharacter* User) override;
 
 	/** Cevher türü (worth = enum değeri). */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ore Rush|Vein")
+	UPROPERTY(EditAnywhere, Replicated, BlueprintReadOnly, Category = "Ore Rush|Vein")
 	EOreType OreType = EOreType::Iron;
 
 	/** True ise sınırsız kazılır (demir). */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ore Rush|Vein")
+	UPROPERTY(EditAnywhere, Replicated, BlueprintReadOnly, Category = "Ore Rush|Vein")
 	bool bUnlimited = true;
 
 	/** Kalan birim (yalnız sınırlı damarlarda; altın/elmas). */

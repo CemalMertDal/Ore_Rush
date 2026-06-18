@@ -49,6 +49,11 @@ void ADefenseBase::BeginPlay()
 void ADefenseBase::Arm()
 {
 	bArmed = true;
+
+	if (AOreRushCharacter* Enemy = FindEnemyInRange())
+	{
+		OnEnemyInRange(Enemy);
+	}
 }
 
 void ADefenseBase::ServerInit(ETeam InOwnerTeam)
