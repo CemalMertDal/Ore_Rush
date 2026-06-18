@@ -29,6 +29,9 @@ public:
 	/** Server-only: kozmetik renk index'i (menüden seçilir). */
 	void SetColorIndex(uint8 NewIndex);
 
+	/** Seamless travel'da Team/ColorIndex'i yeni PlayerState'e taşır. */
+	virtual void CopyProperties(APlayerState* PlayerState) override;
+
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 

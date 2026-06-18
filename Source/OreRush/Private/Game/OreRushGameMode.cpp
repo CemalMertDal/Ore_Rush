@@ -10,6 +10,7 @@
 #include "GameFramework/Pawn.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
+#include "TimerManager.h"
 
 AOreRushGameMode::AOreRushGameMode()
 {
@@ -19,6 +20,8 @@ AOreRushGameMode::AOreRushGameMode()
 	PlayerControllerClass = AOreRushPlayerController::StaticClass();
 	PlayerStateClass = AOreRushPlayerState::StaticClass();
 	GameStateClass = AOreRushGameState::StaticClass();
+
+	bUseSeamlessTravel = true;
 }
 
 void AOreRushGameMode::InitGameState()
@@ -52,8 +55,14 @@ void AOreRushGameMode::PostLogin(APlayerController* NewPlayer)
 			*PS->GetPlayerName(),
 			(Assigned == ETeam::Red ? TEXT("Red") : TEXT("Blue")));
 
-		PlacePlayerAtDepot(NewPlayer);
+		EnsurePlayersAtDepots();
 	}
+}
+
+void AOreRushGameMode::HandleSeamlessTravelPlayer(AController*& C)
+{
+	Super::HandleSeamlessTravelPlayer(C);
+	EnsurePlayersAtDepots();
 }
 
 ETeam AOreRushGameMode::PickTeamForNewPlayer()
@@ -93,36 +102,54 @@ AActor* AOreRushGameMode::ChoosePlayerStart_Implementation(AController* Player)
 	return Super::ChoosePlayerStart_Implementation(Player);
 }
 
-void AOreRushGameMode::PlacePlayerAtDepot(APlayerController* PC)
+void AOreRushGameMode::EnsurePlayersAtDepots()
 {
-	if (PC == nullptr)
-	{
-		return;
-	}
-
-	APawn* Pawn = PC->GetPawn();
-	if (Pawn == nullptr)
-	{
-		return;
-	}
-
-	ETeam Team = ETeam::None;
-	if (const AOreRushPlayerState* PS = PC->GetPlayerState<AOreRushPlayerState>())
-	{
-		Team = PS->GetTeam();
-	}
-
-	if (ADepotZone* Depot = FindDepotForTeam(Team))
-	{
-		Pawn->SetActorLocation(Depot->GetActorLocation() + FVector(0.f, 0.f, 150.f), false, nullptr, ETeleportType::TeleportPhysics);
-	}
+	PlacementAttempts = 0;
+	RunPlacementPass();
 }
 
-void AOreRushGameMode::PlacePlayersAtDepots()
+void AOreRushGameMode::RunPlacementPass()
 {
-	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	UWorld* World = GetWorld();
+	if (World == nullptr)
 	{
-		PlacePlayerAtDepot(It->Get());
+		return;
+	}
+
+	bool bAllPlaced = true;
+
+	for (FConstPlayerControllerIterator It = World->GetPlayerControllerIterator(); It; ++It)
+	{
+		APlayerController* PC = It->Get();
+		if (PC == nullptr || PlacedControllers.Contains(PC))
+		{
+			continue;
+		}
+
+		APawn* Pawn = PC->GetPawn();
+
+		ETeam Team = ETeam::None;
+		if (const AOreRushPlayerState* PS = PC->GetPlayerState<AOreRushPlayerState>())
+		{
+			Team = PS->GetTeam();
+		}
+		ADepotZone* Depot = FindDepotForTeam(Team);
+
+		if (Pawn && Depot)
+		{
+			Pawn->SetActorLocation(Depot->GetActorLocation() + FVector(0.f, 0.f, 150.f), false, nullptr, ETeleportType::TeleportPhysics);
+			PlacedControllers.Add(PC);
+		}
+		else
+		{
+			bAllPlaced = false;
+		}
+	}
+
+	if (!bAllPlaced && PlacementAttempts < 20)
+	{
+		PlacementAttempts++;
+		World->GetTimerManager().SetTimer(PlacementRetryTimer, this, &AOreRushGameMode::RunPlacementPass, 0.25f, false);
 	}
 }
 

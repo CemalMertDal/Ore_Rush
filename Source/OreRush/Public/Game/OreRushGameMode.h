@@ -27,21 +27,27 @@ public:
 
 	void CheckWinCondition();
 
-	/** Tüm mevcut oyuncuları kendi takım depolarına taşır (MapGenerator üretim sonrası çağırır). */
-	void PlacePlayersAtDepots();
+	/** Oyuncuları kendi takım depolarına taşır; depo/pawn hazır değilse kısa retry ile garanti eder. */
+	void EnsurePlayersAtDepots();
 
 	/** Maçı aynı haritada yeniden başlat (yeni seed). Listen server'ı korur. */
 	void RestartMatch();
 
 protected:
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+	virtual void HandleSeamlessTravelPlayer(AController*& C) override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Ore Rush|Match")
-	int32 QuotaTarget = 20;
+	int32 QuotaTarget = 50;
 
 	ETeam PickTeamForNewPlayer();
 
 	ADepotZone* FindDepotForTeam(ETeam Team) const;
 
-	void PlacePlayerAtDepot(APlayerController* PC);
+private:
+	void RunPlacementPass();
+
+	TSet<TWeakObjectPtr<AController>> PlacedControllers;
+	FTimerHandle PlacementRetryTimer;
+	int32 PlacementAttempts = 0;
 };

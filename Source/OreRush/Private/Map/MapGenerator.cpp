@@ -214,6 +214,6 @@ void AMapGenerator::Generate(int32 Seed)
 
 	if (AOreRushGameMode* GM = World->GetAuthGameMode<AOreRushGameMode>())
 	{
-		GM->PlacePlayersAtDepots();
+		GM->EnsurePlayersAtDepots();
 	}
 }

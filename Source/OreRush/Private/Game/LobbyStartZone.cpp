@@ -112,6 +112,13 @@ void ALobbyStartZone::Tick1s()
 		return;
 	}
 
+	Inside.RemoveAll([](const TWeakObjectPtr<AOreRushCharacter>& C) { return !C.IsValid(); });
+	if (Inside.Num() < RequiredPlayers)
+	{
+		CancelCountdown();
+		return;
+	}
+
 	CountdownSeconds--;
 	OnRep_Countdown();
 

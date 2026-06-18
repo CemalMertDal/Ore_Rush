@@ -35,6 +35,17 @@ void AOreRushPlayerState::OnRep_Cosmetic()
 	OnCosmeticChanged();
 }
 
+void AOreRushPlayerState::CopyProperties(APlayerState* PlayerState)
+{
+	Super::CopyProperties(PlayerState);
+
+	if (AOreRushPlayerState* PS = Cast<AOreRushPlayerState>(PlayerState))
+	{
+		PS->Team = Team;
+		PS->ColorIndex = ColorIndex;
+	}
+}
+
 void AOreRushPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

@@ -28,7 +28,7 @@ public:
 
 	/** Kazanmak için gereken kota (örn. 50). */
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Ore Rush|Score")
-	int32 QuotaTarget = 20;
+	int32 QuotaTarget = 50;
 
 	/** Prosedürel harita seed'i (deterministik üretim için senkron). */
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Ore Rush|Map")
