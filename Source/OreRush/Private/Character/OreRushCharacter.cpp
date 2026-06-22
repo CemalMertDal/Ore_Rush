@@ -15,6 +15,7 @@
 #include "Components/BuildComponent.h"
 #include "Ore/OreVein.h"
 #include "Player/OreRushPlayerState.h"
+#include "Game/OreRushGameState.h"
 #include "CollisionQueryParams.h"
 #include "TimerManager.h"
 #include "Net/UnrealNetwork.h"
@@ -124,9 +125,16 @@ void AOreRushCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	}
 }
 
+bool AOreRushCharacter::IsMatchOver() const
+{
+	const UWorld* W = GetWorld();
+	const AOreRushGameState* GS = W ? W->GetGameState<AOreRushGameState>() : nullptr;
+	return GS && GS->IsMatchEnded();
+}
+
 void AOreRushCharacter::Move(const FInputActionValue& Value)
 {
-	if (bIsMining || bStunned)
+	if (bIsMining || bStunned || IsMatchOver())
 	{
 		return;
 	}
@@ -163,7 +171,7 @@ void AOreRushCharacter::Look(const FInputActionValue& Value)
 
 void AOreRushCharacter::DashInput()
 {
-	if (bStunned)
+	if (bStunned || IsMatchOver())
 	{
 		return;
 	}
@@ -245,7 +253,7 @@ void AOreRushCharacter::StopInteract()
 
 void AOreRushCharacter::ServerStartInteract_Implementation()
 {
-	if (bIsMining || bStunned)
+	if (bIsMining || bStunned || IsMatchOver())
 	{
 		return;
 	}
@@ -519,35 +527,6 @@ void AOreRushCharacter::OnRep_Shield()
 	OnBuffChanged.Broadcast(EOreRushBuff::Shield, bShielded);
 }
 
-void AOreRushCharacter::ServerApplyReveal(float Duration)
-{
-	if (!HasAuthority() || Duration <= 0.f)
-	{
-		return;
-	}
-
-	bRevealActive = true;
-	OnRep_Reveal();
-	GetWorldTimerManager().SetTimer(RevealTimerHandle, this, &AOreRushCharacter::ClearReveal, Duration, false);
-}
-
-void AOreRushCharacter::ClearReveal()
-{
-	if (!HasAuthority())
-	{
-		return;
-	}
-
-	bRevealActive = false;
-	OnRep_Reveal();
-}
-
-void AOreRushCharacter::OnRep_Reveal()
-{
-	OnRevealStateChanged(bRevealActive);
-	OnBuffChanged.Broadcast(EOreRushBuff::Reveal, bRevealActive);
-}
-
 AOreRushCharacter* AOreRushCharacter::GetEnemyCharacter() const
 {
 	ETeam MyTeam = ETeam::None;
@@ -601,6 +580,5 @@ void AOreRushCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AOreRushCharacter, SlowMultiplier);
 	DOREPLIFETIME(AOreRushCharacter, BuffSpeedMultiplier);
 	DOREPLIFETIME(AOreRushCharacter, bShielded);
-	DOREPLIFETIME(AOreRushCharacter, bRevealActive);
 	DOREPLIFETIME(AOreRushCharacter, bMiningBuffActive);
 }

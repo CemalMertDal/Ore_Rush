@@ -50,11 +50,6 @@ public:
 
 	float GetMiningSpeedMultiplier() const { return MiningSpeedMultiplier; }
 
-	void ServerApplyReveal(float Duration);
-
-	UFUNCTION(BlueprintPure, Category = "Ore Rush|Status")
-	bool IsRevealActive() const { return bRevealActive; }
-
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Status")
 	AOreRushCharacter* GetEnemyCharacter() const;
 
@@ -174,15 +169,6 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ore Rush|Status")
 	void OnShieldStateChanged(bool bInShielded);
 
-	UPROPERTY(ReplicatedUsing = OnRep_Reveal, BlueprintReadOnly, Category = "Ore Rush|Status")
-	bool bRevealActive = false;
-
-	UFUNCTION()
-	void OnRep_Reveal();
-
-	UFUNCTION(BlueprintImplementableEvent, Category = "Ore Rush|Status")
-	void OnRevealStateChanged(bool bInRevealActive);
-
 	UPROPERTY(ReplicatedUsing = OnRep_MiningBuff, BlueprintReadOnly, Category = "Ore Rush|Status")
 	bool bMiningBuffActive = false;
 
@@ -233,7 +219,8 @@ private:
 	void ClearSpeedBuff();
 	void ClearMiningBuff();
 	void ClearShield();
-	void ClearReveal();
+
+	bool IsMatchOver() const;
 
 	float MiningSpeedMultiplier = 1.f;
 
@@ -245,7 +232,6 @@ private:
 	FTimerHandle SpeedBuffTimerHandle;
 	FTimerHandle MiningBuffTimerHandle;
 	FTimerHandle ShieldTimerHandle;
-	FTimerHandle RevealTimerHandle;
 	float BaseWalkSpeed = 500.f;
 
 	FVector LastMoveWorldDir = FVector::ZeroVector;

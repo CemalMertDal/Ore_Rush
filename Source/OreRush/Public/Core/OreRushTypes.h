@@ -31,6 +31,5 @@ enum class EOreRushBuff : uint8
 {
 	Speed   UMETA(DisplayName = "Speed"),
 	Mining  UMETA(DisplayName = "Mining"),
-	Shield  UMETA(DisplayName = "Shield"),
-	Reveal  UMETA(DisplayName = "Reveal")
+	Shield  UMETA(DisplayName = "Shield")
 };

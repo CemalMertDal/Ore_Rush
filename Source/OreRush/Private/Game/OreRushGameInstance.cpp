@@ -46,6 +46,16 @@ void UOreRushGameInstance::ReturnToMenu(const FString &MenuMap) {
   UGameplayStatics::OpenLevel(this, FName(*Map), true);
 }
 
+void UOreRushGameInstance::LeaveToMenu() {
+  if (SessionInterface.IsValid() &&
+      SessionInterface->GetNamedSession(NAME_GameSession) != nullptr) {
+    bWantsMenuAfterDestroy = true;
+    DestroySteamSession();
+    return;
+  }
+  UGameplayStatics::OpenLevel(this, FName(*DefaultMenuMap), true);
+}
+
 bool UOreRushGameInstance::IsUsingNullSubsystem() const {
   IOnlineSubsystem *Subsystem = IOnlineSubsystem::Get();
   return !Subsystem || Subsystem->GetSubsystemName() == TEXT("NULL");
@@ -217,6 +227,12 @@ void UOreRushGameInstance::HandleDestroySessionComplete(FName SessionName,
   }
 
   OnDestroyComplete.Broadcast(bSuccess);
+
+  if (bWantsMenuAfterDestroy) {
+    bWantsMenuAfterDestroy = false;
+    UGameplayStatics::OpenLevel(this, FName(*DefaultMenuMap), true);
+    return;
+  }
 
   if (bSuccess && bWantsToHostAfterDestroy) {
     bWantsToHostAfterDestroy = false;

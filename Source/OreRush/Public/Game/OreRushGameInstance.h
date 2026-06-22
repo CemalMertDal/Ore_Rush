@@ -49,6 +49,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Ore Rush|Network")
 	void ReturnToMenu(const FString& MenuMap);
 
+	UFUNCTION(BlueprintCallable, Category = "Ore Rush|Network")
+	void LeaveToMenu();
+
 	UFUNCTION(BlueprintCallable, Category = "Ore Rush|Steam")
 	void HostSteamSession(int32 MaxPlayers = 2);
 
@@ -100,6 +103,7 @@ private:
 	FDelegateHandle DestroyHandle;
 
 	bool bWantsToHostAfterDestroy = false;
+	bool bWantsMenuAfterDestroy = false;
 	int32 PendingHostMaxPlayers = 2;
 
 	void InternalCreateSession(int32 MaxPlayers);
