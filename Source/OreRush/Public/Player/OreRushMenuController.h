@@ -17,7 +17,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	/** Menü ekranı (BP'de WBP_MainMenu atanır). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Menu")
 	TSubclassOf<UUserWidget> MenuWidgetClass;
 

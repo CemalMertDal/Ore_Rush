@@ -20,7 +20,6 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	/** Alındığında etkiyi uygula (subclass doldurur, sunucu). */
 	virtual void ServerApplyTo(AOreRushCharacter* User);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ore Rush|PowerUp")
@@ -29,11 +28,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ore Rush|PowerUp")
 	TObjectPtr<UStaticMeshComponent> Mesh;
 
-	/** Alındıktan sonra tekrar belirme süresi (saniye). */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ore Rush|PowerUp", meta = (ClampMin = "0.0"))
 	float RespawnTime = 15.f;
 
-	/** Verilen buff'ın süresi (saniye). */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ore Rush|PowerUp", meta = (ClampMin = "0.0"))
 	float BuffDuration = 8.f;
 

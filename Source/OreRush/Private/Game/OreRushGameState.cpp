@@ -1,4 +1,3 @@
-// Ore Rush — maç durumu (implementation).
 
 #include "Game/OreRushGameState.h"
 #include "Game/OreRushGameMode.h"

@@ -1,4 +1,3 @@
-// Ore Rush — maç akışı (server-only): team ata, üretim, kota/kazanan kontrolü.
 
 #pragma once
 
@@ -9,11 +8,6 @@
 
 class ADepotZone;
 
-/**
- * AOreRushGameMode
- * Sunucu-otorite maç yönetimi. Şimdilik default sınıfları (pawn/controller/state) bağlar.
- * Step 4: team ataması, kota kontrolü ve kazanan ilanı buraya gelecek.
- */
 UCLASS()
 class ORERUSH_API AOreRushGameMode : public AGameModeBase
 {
@@ -27,10 +21,8 @@ public:
 
 	void CheckWinCondition();
 
-	/** Oyuncuları kendi takım depolarına taşır; depo/pawn hazır değilse kısa retry ile garanti eder. */
 	void EnsurePlayersAtDepots();
 
-	/** Maçı aynı haritada yeniden başlat (yeni seed). Listen server'ı korur. */
 	void RestartMatch();
 
 protected:

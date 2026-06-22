@@ -1,4 +1,3 @@
-// Ore Rush — maç durumu: takım kasaları (skor), kota, harita seed'i.
 
 #pragma once
 
@@ -7,30 +6,21 @@
 #include "Core/OreRushTypes.h"
 #include "OreRushGameState.generated.h"
 
-/**
- * AOreRushGameState
- * Takım kasaları = skor (replicated, RepNotify → HUD). Kota hedefi ve harita seed'i
- * tüm client'larda senkron. Kazanan kontrolü GameMode'da (server), sonuç buradan okunur.
- */
 UCLASS()
 class ORERUSH_API AOreRushGameState : public AGameStateBase
 {
 	GENERATED_BODY()
 
 public:
-	/** Kırmızı takım kasası (skor). */
 	UPROPERTY(ReplicatedUsing = OnRep_Scores, BlueprintReadOnly, Category = "Ore Rush|Score")
 	int32 RedScore = 0;
 
-	/** Mavi takım kasası (skor). */
 	UPROPERTY(ReplicatedUsing = OnRep_Scores, BlueprintReadOnly, Category = "Ore Rush|Score")
 	int32 BlueScore = 0;
 
-	/** Kazanmak için gereken kota (örn. 50). */
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Ore Rush|Score")
 	int32 QuotaTarget = 50;
 
-	/** Prosedürel harita seed'i (deterministik üretim için senkron). */
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Ore Rush|Map")
 	int32 MapSeed = 0;
 
@@ -40,13 +30,11 @@ public:
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Ore Rush|Match")
 	ETeam WinningTeam = ETeam::None;
 
-	/** Takım skorunu artırır (yalnız sunucu). */
 	void AddScore(ETeam Team, int32 Amount);
 
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Score")
 	int32 GetScore(ETeam Team) const;
 
-	/** Server-only: kasadan miktar düşür (baskın). Gerçekte düşen miktarı döner. */
 	int32 RemoveScore(ETeam Team, int32 Amount);
 
 	void EndMatch(ETeam InWinningTeam);
@@ -66,7 +54,6 @@ protected:
 	UFUNCTION()
 	void OnRep_MatchEnded();
 
-	/** HUD hook (skor değişti). Kozmetik/sunum. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ore Rush|Score")
 	void OnScoresChanged();
 

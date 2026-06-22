@@ -1,4 +1,3 @@
-// Ore Rush — cüzdan (implementation).
 
 #include "Components/WalletComponent.h"
 #include "Net/UnrealNetwork.h"

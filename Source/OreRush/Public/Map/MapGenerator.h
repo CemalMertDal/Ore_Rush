@@ -22,11 +22,9 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	/** Editör görselleştirme: üretim alanını wireframe kutu ile gösterir (oyunda gizli). */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Map|Area")
 	TObjectPtr<UBoxComponent> AreaViz;
 
-	/** Tek damar sınıfı — tür spawn'da set edilir, mesh'i kendi seçer. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map|Classes")
 	TSubclassOf<AOreVein> VeinClass;
 
@@ -60,11 +58,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map|Counts", meta = (ClampMin = "0"))
 	int32 DecorCount = 10;
 
-	/** Açıksa yukarıdaki sayılar alana göre ölçeklenir (ReferenceArea'da yazılı değerler geçerli). */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map|Counts")
 	bool bScaleWithArea = true;
 
-	/** Sayıların aynen geçerli olduğu referans alan (yarı-extent). */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map|Counts")
 	FVector2D ReferenceArea = FVector2D(2500.f, 2500.f);
 

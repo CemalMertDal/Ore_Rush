@@ -1,4 +1,3 @@
-// Ore Rush — third-person competitive miner character (implementation).
 
 #include "Character/OreRushCharacter.h"
 
@@ -25,15 +24,12 @@ AOreRushCharacter::AOreRushCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	// Capsule.
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f);
 
-	// Kamera kontrol rotasyonunu mesh'e değil, hareket yönüne bağla (TPS).
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
-	// CharacterMovement: hareket yönüne dön (ödev şartı: bOrientRotationToMovement = true).
 	UCharacterMovementComponent* Move = GetCharacterMovement();
 	Move->bOrientRotationToMovement = true;
 	Move->RotationRate = FRotator(0.f, 500.f, 0.f);
@@ -44,18 +40,15 @@ AOreRushCharacter::AOreRushCharacter()
 	Move->BrakingDecelerationWalking = 2000.f;
 	Move->BrakingDecelerationFalling = 1500.f;
 
-	// SpringArm (kamera kolu) — pawn control rotation ile döner.
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 400.f;
 	CameraBoom->bUsePawnControlRotation = true;
 
-	// Takip kamerası — kol ucundaki sokete bağlı, kendi rotasyonunu kullanmaz.
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
-	// Cüzdan (taşınan cevher — replicated bileşen).
 	Wallet = CreateDefaultSubobject<UWalletComponent>(TEXT("Wallet"));
 
 	Build = CreateDefaultSubobject<UBuildComponent>(TEXT("Build"));
@@ -65,7 +58,6 @@ void AOreRushCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Yerel olarak kontrol edilen oyuncuda Enhanced Input mapping context'i ekle.
 	if (const APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
@@ -77,13 +69,11 @@ void AOreRushCharacter::BeginPlay()
 			}
 			if (MouseLookMappingContext)
 			{
-				// Mouse look ayrı context — template yapısıyla aynı.
 				Subsystem->AddMappingContext(MouseLookMappingContext, 0);
 			}
 		}
 	}
 
-	// Cüzdan yüküne göre hız: değişimi dinle (RepNotify her makinede tetikler).
 	BaseWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	if (Wallet)
 	{
@@ -103,12 +93,10 @@ void AOreRushCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		}
 		if (LookAction)
 		{
-			// Gamepad bakış.
 			EIC->BindAction(LookAction, ETriggerEvent::Triggered, this, &AOreRushCharacter::Look);
 		}
 		if (MouseLookAction)
 		{
-			// Mouse bakış — template'le aynı: ayrı action, aynı Look handler.
 			EIC->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &AOreRushCharacter::Look);
 		}
 		if (JumpAction)
@@ -122,7 +110,6 @@ void AOreRushCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		}
 		if (MineAction)
 		{
-			// Basılı tut: Started → etkileşimi başlat (kaz/baskın), Completed → bırak.
 			EIC->BindAction(MineAction, ETriggerEvent::Started, this, &AOreRushCharacter::StartInteract);
 			EIC->BindAction(MineAction, ETriggerEvent::Completed, this, &AOreRushCharacter::StopInteract);
 		}
@@ -151,7 +138,6 @@ void AOreRushCharacter::Move(const FInputActionValue& Value)
 		return;
 	}
 
-	// Kamera (control) yaw'ına göre ileri/sağ yönleri hesapla.
 	const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
 	const FVector Forward = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	const FVector Right = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
@@ -159,7 +145,6 @@ void AOreRushCharacter::Move(const FInputActionValue& Value)
 	AddMovementInput(Forward, Axis.Y);
 	AddMovementInput(Right, Axis.X);
 
-	// Dash hedeflemesi için son world-space hareket yönünü sakla.
 	LastMoveWorldDir = (Forward * Axis.Y + Right * Axis.X).GetSafeNormal();
 }
 
@@ -183,7 +168,6 @@ void AOreRushCharacter::DashInput()
 		return;
 	}
 
-	// Yerel tahmini cooldown kapısı: sunucuyu boş yere spam'lemez, HUD'ı besler.
 	const float Now = GetWorld()->GetTimeSeconds();
 	if (Now - LastDashRequestTime < DashCooldown)
 	{
@@ -191,7 +175,6 @@ void AOreRushCharacter::DashInput()
 	}
 	LastDashRequestTime = Now;
 
-	// Yön: önce mevcut hız, sonra son input yönü, en son karakterin baktığı yön.
 	FVector Dir = GetVelocity().GetSafeNormal2D();
 	if (Dir.IsNearlyZero())
 	{
@@ -207,13 +190,11 @@ void AOreRushCharacter::DashInput()
 
 bool AOreRushCharacter::ServerDash_Validate(FVector DashDirection)
 {
-	// NaN/sonsuz yön reddedilir; geri kalanı sunucu normalize eder.
 	return !DashDirection.ContainsNaN();
 }
 
 void AOreRushCharacter::ServerDash_Implementation(FVector DashDirection)
 {
-	// Otorite cooldown kontrolü (gerçek karar burada).
 	const float Now = GetWorld()->GetTimeSeconds();
 	if (Now - LastDashTime < DashCooldown)
 	{
@@ -229,16 +210,13 @@ void AOreRushCharacter::ServerDash_Implementation(FVector DashDirection)
 
 	const FVector LaunchVelocity = Dir * DashImpulse + FVector(0.f, 0.f, DashVerticalImpulse);
 
-	// XY'yi dash hızıyla ez; dikey itme varsa Z'yi de ez.
 	LaunchCharacter(LaunchVelocity, /*bXYOverride=*/true, /*bZOverride=*/DashVerticalImpulse > 0.f);
 
-	// Kozmetik efekt herkese.
 	MulticastDashFX();
 }
 
 void AOreRushCharacter::MulticastDashFX_Implementation()
 {
-	// Sunum: BP'de Niagara/SFX'e bağlanır (mantık değil).
 	OnDashFX();
 }
 
@@ -254,7 +232,6 @@ float AOreRushCharacter::GetDashCooldownRemaining() const
 	return FMath::Max(0.f, DashCooldown - Elapsed);
 }
 
-//~ Etkileşim (kaz / baskın) ----------------------------------------------------
 
 void AOreRushCharacter::StartInteract()
 {

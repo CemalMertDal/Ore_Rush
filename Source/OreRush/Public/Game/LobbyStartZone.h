@@ -28,15 +28,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ore Rush|Lobby")
 	TObjectPtr<UBoxComponent> Zone;
 
-	/** Geri sayım başlangıç saniyesi. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ore Rush|Lobby", meta = (ClampMin = "1"))
 	int32 StartSeconds = 5;
 
-	/** Sayımın başlaması için alandaki gereken oyuncu sayısı. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ore Rush|Lobby", meta = (ClampMin = "1"))
 	int32 RequiredPlayers = 2;
 
-	/** Sayım dolunca gidilecek harita. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ore Rush|Lobby")
 	FString GameMapPath = TEXT("/Game/Maps/MainMap");
 
@@ -52,11 +49,9 @@ protected:
 	UFUNCTION()
 	void OnRep_Counting();
 
-	/** Sayı değişti (havadaki 5..4..3 görseli için). */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ore Rush|Lobby")
 	void OnCountdownChanged(int32 Seconds);
 
-	/** Sayım başladı/durdu (görseli göster/gizle). */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ore Rush|Lobby")
 	void OnCountingChanged(bool bActive);
 

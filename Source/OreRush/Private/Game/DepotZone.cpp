@@ -18,13 +18,11 @@ ADepotZone::ADepotZone()
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
 
-	// OverlapBox kök bileşen olarak atanır.
 	OverlapBox = CreateDefaultSubobject<UBoxComponent>(TEXT("OverlapBox"));
 	OverlapBox->InitBoxExtent(FVector(150.f, 150.f, 100.f));
 	OverlapBox->SetCollisionProfileName(TEXT("Trigger"));
 	SetRootComponent(OverlapBox);
 
-	// Baskın bakış-trace hedefi: yalnız Visibility kanalını bloklar, hareketi engellemez.
 	InteractBox = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractBox"));
 	InteractBox->SetupAttachment(OverlapBox);
 	InteractBox->InitBoxExtent(FVector(150.f, 150.f, 100.f));
@@ -33,7 +31,6 @@ ADepotZone::ADepotZone()
 	InteractBox->SetCollisionResponseToAllChannels(ECR_Ignore);
 	InteractBox->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 
-	// Görsel mesh.
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(OverlapBox);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -43,7 +40,6 @@ void ADepotZone::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Sunucuda overlap olayını dinle.
 	if (HasAuthority())
 	{
 		OverlapBox->OnComponentBeginOverlap.AddDynamic(this, &ADepotZone::OnOverlapBegin);
@@ -71,13 +67,11 @@ void ADepotZone::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Oth
 		return;
 	}
 
-	// Busted: sahip takım oyuncusu baskın sırasında kendi deposuna dönerse baskını bozar.
 	if (bBeingRaided && Team != ETeam::None && PS->GetTeam() == Team)
 	{
 		EndRaid(true);
 	}
 
-	// Sadece bu deponun sahibi olan takımın oyuncuları teslimat yapabilir.
 	if (PS->GetTeam() != Team || Team == ETeam::None)
 	{
 		FString Msg = FString::Printf(TEXT("[%s] Yanlis alan veya calinacak mal yok! (Senin takimin: %s, Depo takimi: %s)"),
@@ -111,7 +105,6 @@ void ADepotZone::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Oth
 		return;
 	}
 
-	// Cüzdanı boşalt ve kazanılan değeri al.
 	const int32 ClearedWorth = Wallet->ServerClear();
 	if (ClearedWorth > 0)
 	{
@@ -172,7 +165,6 @@ void ADepotZone::ServerStartInteract(AOreRushCharacter* User)
 		return;
 	}
 
-	// Owner zaten kendi deposunda bekliyorsa baskıncı anında yakalanır (busted).
 	if (IsOwnerPresent())
 	{
 		CurrentRaider = User;

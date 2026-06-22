@@ -1,4 +1,3 @@
-// Ore Rush — oyuncu durumu (implementation).
 
 #include "Player/OreRushPlayerState.h"
 #include "Net/UnrealNetwork.h"

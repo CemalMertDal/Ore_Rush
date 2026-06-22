@@ -40,15 +40,12 @@ class ORERUSH_API UOreRushGameInstance : public UGameInstance
 public:
 	virtual void Init() override;
 
-	/** Listen server olarak haritayı aç (Host — IP/LAN fallback). */
 	UFUNCTION(BlueprintCallable, Category = "Ore Rush|Network")
 	void HostGame(const FString& MapName);
 
-	/** Verilen IP'ye bağlan (Join — LAN fallback). */
 	UFUNCTION(BlueprintCallable, Category = "Ore Rush|Network")
 	void JoinGame(const FString& IpAddress);
 
-	/** Ana menü haritasına dön. */
 	UFUNCTION(BlueprintCallable, Category = "Ore Rush|Network")
 	void ReturnToMenu(const FString& MenuMap);
 
@@ -79,7 +76,6 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Ore Rush|Steam")
 	FOreRushOnDestroyComplete OnDestroyComplete;
 
-	/** Menüde seçilen renk index'i (bağlandıktan sonra sunucuya yollanır). */
 	UPROPERTY(BlueprintReadWrite, Category = "Ore Rush|Cosmetic")
 	uint8 SelectedColor = 0;
 
@@ -90,7 +86,6 @@ public:
 	FString DefaultMenuMap = TEXT("/Game/Maps/MainMenu");
 
 protected:
-	/** Host'un indiği bekleme/lobi haritası (hem Steam hem LAN). */
 	UPROPERTY(EditDefaultsOnly, Category = "Ore Rush|Network")
 	FString LobbyMapPath = TEXT("/Game/Maps/Lobby");
 

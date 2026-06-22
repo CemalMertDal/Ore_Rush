@@ -1,4 +1,3 @@
-// Ore Rush — cüzdan: taşınan cevher (replicated), kapasite, doluyken yavaşlama.
 
 #pragma once
 
@@ -9,12 +8,6 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWalletChanged);
 
-/**
- * UWalletComponent
- * Madencinin taşıdığı cevher. Tür bazında sayaç (replicated). Kazılan cevher buraya girer;
- * depoda kasaya yatırılır (skor). Kapasite sınırlı, doluyken hız düşer. Tuzakta düşürülür.
- * Tüm değişiklikler server-authoritative.
- */
 UCLASS(ClassGroup = (OreRush), meta = (BlueprintSpawnableComponent))
 class ORERUSH_API UWalletComponent : public UActorComponent
 {
@@ -23,15 +16,12 @@ class ORERUSH_API UWalletComponent : public UActorComponent
 public:
 	UWalletComponent();
 
-	/** Taşıma kapasitesi (worth bazlı: demir 1, altın 2, elmas 5 yer kaplar). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Wallet", meta = (ClampMin = "1"))
 	int32 Capacity = 15;
 
-	/** Cüzdan tam doluyken hız çarpanı (boşken 1.0 → doluyken bu değere lerp). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Wallet", meta = (ClampMin = "0.1", ClampMax = "1.0"))
 	float FullSpeedMultiplier = 0.55f;
 
-	/** Cüzdan her değiştiğinde (tüm makinelerde RepNotify ile) — HUD + hız güncelleme. */
 	UPROPERTY(BlueprintAssignable, Category = "Ore Rush|Wallet")
 	FOnWalletChanged OnWalletChanged;
 
@@ -41,7 +31,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Wallet")
 	int32 GetTotalUnits() const { return IronCount + GoldCount + DiamondCount; }
 
-	/** Kasa değeri: demir×1 + altın×2 + elmas×5. */
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Wallet")
 	int32 GetTotalWorth() const;
 
@@ -51,21 +40,17 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Wallet")
 	bool IsFull() const { return GetTotalWorth() >= GetEffectiveCapacity(); }
 
-	/** Yüke göre hız çarpanı (1.0 → FullSpeedMultiplier). */
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Wallet")
 	float GetSpeedMultiplier() const;
 
-	/** Server-only: 1 birim ekle. Doluysa veya tür geçersizse false. */
 	bool ServerAddOre(EOreType Type);
 
-	/** Server-only: cüzdanı boşalt (depoya yatırma / tuzak). Boşaltılan toplam worth döner. */
 	int32 ServerClear();
 
 	bool ServerSpendWorth(int32 Cost);
 
 	void ServerTakeAll(int32& OutIron, int32& OutGold, int32& OutDiamond);
 
-	/** Server-only: süreli taşıma kapasitesi bonusu (capacity power-up). */
 	void ServerApplyCapacityBonus(int32 Amount, float Duration);
 
 protected:

@@ -28,7 +28,6 @@ protected:
 
 	virtual void OnEnemyInRange(AOreRushCharacter* Enemy);
 
-	/** Menzilde (Range overlap) duran ilk düşman karakteri döndür (sunucu). */
 	AOreRushCharacter* FindEnemyInRange() const;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ore Rush|Defense")
@@ -40,7 +39,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Defense", meta = (ClampMin = "0.0"))
 	float ArmDelay = 0.5f;
 
-	/** Otomatik yok olma süresi (saniye). 0 = sınırsız. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Defense", meta = (ClampMin = "0.0"))
 	float Lifetime = 45.f;
 

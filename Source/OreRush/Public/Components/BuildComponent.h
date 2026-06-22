@@ -26,7 +26,6 @@ class ORERUSH_API UBuildComponent : public UActorComponent
 public:
 	UBuildComponent();
 
-	/** Seçili tuzak değişti (HUD isim/ücret güncellemesi — Tick'e gerek yok). */
 	UPROPERTY(BlueprintAssignable, Category = "Ore Rush|Build")
 	FOnBuildSelectionChanged OnSelectionChanged;
 

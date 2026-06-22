@@ -1,4 +1,3 @@
-// Ore Rush — cevher damarı: kazılabilir kaynak (demir sınırsız / altın-elmas sınırlı).
 
 #pragma once
 
@@ -13,12 +12,6 @@ class UStaticMeshComponent;
 class UStaticMesh;
 class AOreRushCharacter;
 
-/**
- * AOreVein
- * Kazılabilir cevher damarı. Demir sınırsız (bUnlimited), altın/elmas sınırlı (RemainingUnits,
- * replicated). Karakter bakıp kazma tuşunu basılı tutunca sunucu MineTime aralıklarıyla
- * ServerExtractOne çağırır; sınırlı damar tükenince yok olur. Server-authoritative.
- */
 UCLASS()
 class ORERUSH_API AOreVein : public AActor, public IOreRushInteractable
 {
@@ -31,31 +24,30 @@ public:
 	virtual void ServerStartInteract(AOreRushCharacter* User) override;
 	virtual void ServerStopInteract(AOreRushCharacter* User) override;
 
-	/** Cevher türü (worth = enum değeri). */
 	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_OreType, BlueprintReadOnly, Category = "Ore Rush|Vein")
 	EOreType OreType = EOreType::Iron;
 
-	/** Tür → görsel mesh (BP'de Iron/Gold/Diamond atanır). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Vein")
 	TMap<EOreType, TObjectPtr<UStaticMesh>> OreMeshes;
 
-	/** True ise sınırsız kazılır (demir). */
 	UPROPERTY(EditAnywhere, Replicated, BlueprintReadOnly, Category = "Ore Rush|Vein")
 	bool bUnlimited = true;
 
-	/** Kalan birim (yalnız sınırlı damarlarda; altın/elmas). */
 	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_RemainingUnits, BlueprintReadOnly, Category = "Ore Rush|Vein", meta = (ClampMin = "0", EditCondition = "!bUnlimited"))
 	int32 RemainingUnits = 10;
 
-	/** Bir birim kazma süresi (saniye). */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ore Rush|Vein", meta = (ClampMin = "0.05"))
 	float MineTime = 1.0f;
 
-	/** Bu damar daha kazılabilir mi? (sunucu mantığı + UI) */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Vein")
+	TMap<EOreType, float> MineTimes;
+
+	UFUNCTION(BlueprintPure, Category = "Ore Rush|Vein")
+	float GetEffectiveMineTime() const;
+
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Vein")
 	bool CanBeMined() const { return !bDepleted && (bUnlimited || RemainingUnits > 0); }
 
-	/** Server-only: 1 birim çıkar. Çıkan türü döner; tükendiyse EOreType::None. */
 	EOreType ServerExtractOne();
 
 protected:
@@ -65,22 +57,18 @@ protected:
 	UFUNCTION()
 	void OnRep_OreType();
 
-	/** Etkileşim/çarpışma kök bileşeni (mesh atanmasa da trace edilebilir). */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ore Rush|Vein")
 	TObjectPtr<UBoxComponent> InteractBox;
 
-	/** Görsel mesh (kozmetik — BP'de atanır). */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ore Rush|Vein")
 	TObjectPtr<UStaticMeshComponent> Mesh;
 
 	UFUNCTION()
 	void OnRep_RemainingUnits();
 
-	/** Kazma vuruşu efekti (herkes — demir dahil). */
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastMineHit();
 
-	/** FX hook'ları (yalnız BP: Niagara/SFX — mantık değil). */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ore Rush|Vein")
 	void OnMineHitFX();
 
@@ -88,12 +76,10 @@ protected:
 	void OnDepletedFX();
 
 private:
-	/** Server: damarı tüket → FX + kısa gecikmeyle yok et. */
 	void Deplete();
 
 	void MineTick();
 
-	/** OreType'a göre mesh'i seç (BeginPlay + OnRep). */
 	void ApplyMeshForType();
 
 	bool bDepleted = false;

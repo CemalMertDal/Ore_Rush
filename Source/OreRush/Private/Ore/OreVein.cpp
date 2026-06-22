@@ -1,4 +1,3 @@
-// Ore Rush — cevher damarı (implementation).
 
 #include "Ore/OreVein.h"
 #include "Components/BoxComponent.h"
@@ -15,7 +14,6 @@ AOreVein::AOreVein()
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
 
-	// Kök = çarpışma kutusu: mesh atanmasa da trace/etkileşim çalışır.
 	InteractBox = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractBox"));
 	InteractBox->InitBoxExtent(FVector(50.f, 50.f, 50.f));
 	InteractBox->SetCollisionProfileName(TEXT("BlockAll"));
@@ -24,6 +22,19 @@ AOreVein::AOreVein()
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(InteractBox);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	MineTimes.Add(EOreType::Iron, 1.0f);
+	MineTimes.Add(EOreType::Gold, 2.5f);
+	MineTimes.Add(EOreType::Diamond, 5.0f);
+}
+
+float AOreVein::GetEffectiveMineTime() const
+{
+	if (const float* Found = MineTimes.Find(OreType))
+	{
+		return FMath::Max(0.05f, *Found);
+	}
+	return FMath::Max(0.05f, MineTime);
 }
 
 void AOreVein::BeginPlay()
@@ -67,7 +78,7 @@ void AOreVein::ServerStartInteract(AOreRushCharacter* User)
 
 	CurrentMiner = User;
 
-	const float Interval = FMath::Max(0.05f, MineTime * User->GetMiningSpeedMultiplier());
+	const float Interval = FMath::Max(0.05f, GetEffectiveMineTime() * User->GetMiningSpeedMultiplier());
 	GetWorldTimerManager().SetTimer(MineTimerHandle, this, &AOreVein::MineTick, Interval, true, Interval);
 }
 
@@ -154,7 +165,6 @@ void AOreVein::Deplete()
 	}
 	CurrentMiner = nullptr;
 
-	// Multicast/RepNotify'ın client'lara ulaşması için kısa gecikmeyle yok et.
 	SetLifeSpan(0.2f);
 }
 

@@ -23,7 +23,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Defense", meta = (ClampMin = "0.0"))
 	float ReArmTime = 3.f;
 
-	/** Sıkılan kozmetik mermi sınıfı (boşsa varsayılan kullanılır). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Defense")
 	TSubclassOf<AProjectileBullet> ProjectileClass;
 
