@@ -19,9 +19,7 @@ AMapGenerator::AMapGenerator()
 	AreaViz->SetHiddenInGame(true);
 	AreaViz->bIsEditorOnly = true;
 
-	IronVeinClass = AOreVein::StaticClass();
-	GoldVeinClass = AOreVein::StaticClass();
-	DiamondVeinClass = AOreVein::StaticClass();
+	VeinClass = AOreVein::StaticClass();
 	DepotClass = ADepotZone::StaticClass();
 }
 
@@ -90,8 +88,9 @@ bool AMapGenerator::PickPoint(FRandomStream& Rng, FVector& OutPoint)
 	return false;
 }
 
-AOreVein* AMapGenerator::SpawnVein(TSubclassOf<AOreVein> Cls, EOreType Type, bool bUnlimited, int32 Units, const FVector& Location)
+AOreVein* AMapGenerator::SpawnVein(EOreType Type, bool bUnlimited, int32 Units, const FVector& Location)
 {
+	TSubclassOf<AOreVein> Cls = VeinClass;
 	if (!Cls)
 	{
 		Cls = AOreVein::StaticClass();
@@ -110,6 +109,23 @@ AOreVein* AMapGenerator::SpawnVein(TSubclassOf<AOreVein> Cls, EOreType Type, boo
 	return Vein;
 }
 
+int32 AMapGenerator::ScaledCount(int32 Base) const
+{
+	if (!bScaleWithArea || Base <= 0)
+	{
+		return Base;
+	}
+
+	const float RefSize = ReferenceArea.X * ReferenceArea.Y;
+	if (RefSize <= 0.f)
+	{
+		return Base;
+	}
+
+	const float Scale = (AreaExtent.X * AreaExtent.Y) / RefSize;
+	return FMath::Max(1, FMath::RoundToInt(Base * Scale));
+}
+
 void AMapGenerator::Generate(int32 Seed)
 {
 	UWorld* World = GetWorld();
@@ -120,6 +136,12 @@ void AMapGenerator::Generate(int32 Seed)
 
 	FRandomStream Rng(Seed);
 	const FVector Origin = GetActorLocation();
+
+	const int32 NumIron = ScaledCount(IronCount);
+	const int32 NumGold = ScaledCount(GoldCount);
+	const int32 NumDiamond = ScaledCount(DiamondCount);
+	const int32 NumPowerUp = ScaledCount(PowerUpCount);
+	const int32 NumDecor = ScaledCount(DecorCount);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
@@ -150,36 +172,36 @@ void AMapGenerator::Generate(int32 Seed)
 		UsedPoints.Add(BlueLoc);
 	}
 
-	for (int32 i = 0; i < IronCount; ++i)
+	for (int32 i = 0; i < NumIron; ++i)
 	{
 		FVector P;
 		if (PickPoint(Rng, P))
 		{
-			SpawnVein(IronVeinClass, EOreType::Iron, true, 0, P);
+			SpawnVein(EOreType::Iron, true, 0, P);
 		}
 	}
 
-	for (int32 i = 0; i < GoldCount; ++i)
+	for (int32 i = 0; i < NumGold; ++i)
 	{
 		FVector P;
 		if (PickPoint(Rng, P))
 		{
-			SpawnVein(GoldVeinClass, EOreType::Gold, false, GoldUnits, P);
+			SpawnVein(EOreType::Gold, false, GoldUnits, P);
 		}
 	}
 
-	for (int32 i = 0; i < DiamondCount; ++i)
+	for (int32 i = 0; i < NumDiamond; ++i)
 	{
 		FVector P;
 		if (PickPoint(Rng, P))
 		{
-			SpawnVein(DiamondVeinClass, EOreType::Diamond, false, DiamondUnits, P);
+			SpawnVein(EOreType::Diamond, false, DiamondUnits, P);
 		}
 	}
 
 	if (PowerUpClasses.Num() > 0)
 	{
-		for (int32 i = 0; i < PowerUpCount; ++i)
+		for (int32 i = 0; i < NumPowerUp; ++i)
 		{
 			FVector P;
 			if (!PickPoint(Rng, P))
@@ -196,7 +218,7 @@ void AMapGenerator::Generate(int32 Seed)
 
 	if (DecorClasses.Num() > 0)
 	{
-		for (int32 i = 0; i < DecorCount; ++i)
+		for (int32 i = 0; i < NumDecor; ++i)
 		{
 			FVector P;
 			if (!PickPoint(Rng, P))

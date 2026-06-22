@@ -10,6 +10,7 @@
 
 class UBoxComponent;
 class UStaticMeshComponent;
+class UStaticMesh;
 class AOreRushCharacter;
 
 /**
@@ -31,8 +32,12 @@ public:
 	virtual void ServerStopInteract(AOreRushCharacter* User) override;
 
 	/** Cevher türü (worth = enum değeri). */
-	UPROPERTY(EditAnywhere, Replicated, BlueprintReadOnly, Category = "Ore Rush|Vein")
+	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_OreType, BlueprintReadOnly, Category = "Ore Rush|Vein")
 	EOreType OreType = EOreType::Iron;
+
+	/** Tür → görsel mesh (BP'de Iron/Gold/Diamond atanır). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Vein")
+	TMap<EOreType, TObjectPtr<UStaticMesh>> OreMeshes;
 
 	/** True ise sınırsız kazılır (demir). */
 	UPROPERTY(EditAnywhere, Replicated, BlueprintReadOnly, Category = "Ore Rush|Vein")
@@ -54,7 +59,11 @@ public:
 	EOreType ServerExtractOne();
 
 protected:
+	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION()
+	void OnRep_OreType();
 
 	/** Etkileşim/çarpışma kök bileşeni (mesh atanmasa da trace edilebilir). */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ore Rush|Vein")
@@ -83,6 +92,9 @@ private:
 	void Deplete();
 
 	void MineTick();
+
+	/** OreType'a göre mesh'i seç (BeginPlay + OnRep). */
+	void ApplyMeshForType();
 
 	bool bDepleted = false;
 

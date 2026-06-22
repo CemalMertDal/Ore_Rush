@@ -26,14 +26,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Map|Area")
 	TObjectPtr<UBoxComponent> AreaViz;
 
+	/** Tek damar sınıfı — tür spawn'da set edilir, mesh'i kendi seçer. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map|Classes")
-	TSubclassOf<AOreVein> IronVeinClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map|Classes")
-	TSubclassOf<AOreVein> GoldVeinClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map|Classes")
-	TSubclassOf<AOreVein> DiamondVeinClass;
+	TSubclassOf<AOreVein> VeinClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map|Classes")
 	TSubclassOf<ADepotZone> DepotClass;
@@ -65,6 +60,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map|Counts", meta = (ClampMin = "0"))
 	int32 DecorCount = 10;
 
+	/** Açıksa yukarıdaki sayılar alana göre ölçeklenir (ReferenceArea'da yazılı değerler geçerli). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map|Counts")
+	bool bScaleWithArea = true;
+
+	/** Sayıların aynen geçerli olduğu referans alan (yarı-extent). */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map|Counts")
+	FVector2D ReferenceArea = FVector2D(2500.f, 2500.f);
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map|Area")
 	FVector2D AreaExtent = FVector2D(2500.f, 2500.f);
 
@@ -86,7 +89,9 @@ protected:
 private:
 	void Generate(int32 Seed);
 
-	AOreVein* SpawnVein(TSubclassOf<AOreVein> Cls, EOreType Type, bool bUnlimited, int32 Units, const FVector& Location);
+	AOreVein* SpawnVein(EOreType Type, bool bUnlimited, int32 Units, const FVector& Location);
+
+	int32 ScaledCount(int32 Base) const;
 
 	bool PickPoint(FRandomStream& Rng, FVector& OutPoint);
 

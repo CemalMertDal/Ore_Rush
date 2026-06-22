@@ -3,6 +3,7 @@
 #include "Ore/OreVein.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
 #include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
@@ -23,6 +24,33 @@ AOreVein::AOreVein()
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(InteractBox);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AOreVein::BeginPlay()
+{
+	Super::BeginPlay();
+	ApplyMeshForType();
+}
+
+void AOreVein::OnRep_OreType()
+{
+	ApplyMeshForType();
+}
+
+void AOreVein::ApplyMeshForType()
+{
+	if (Mesh == nullptr)
+	{
+		return;
+	}
+
+	if (const TObjectPtr<UStaticMesh>* Found = OreMeshes.Find(OreType))
+	{
+		if (*Found)
+		{
+			Mesh->SetStaticMesh(*Found);
+		}
+	}
 }
 
 bool AOreVein::CanInteract(AOreRushCharacter* User) const
