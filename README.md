@@ -22,7 +22,7 @@ All core logic is written in **C++**; Blueprint is used only for presentation (m
 - 🎒 **Wallet** — limited capacity; you slow down when full and drop it when trapped.
 - 🏦 **Vault & Score** — deposit your wallet at your depot; **score = vault**. The vault is open to raids.
 - 💣 **Traps & Defenses** — built by spending ore (snare, mud, decoy, smoke / barrier, turret).
-- ⚡ **Power-ups** — speed, capacity, mining speed, shield, reveal.
+- ⚡ **Power-ups** — speed, capacity, mining speed, shield.
 - 🗺️ **Procedural Map** — seed-based; both players see the same map.
 
 ## 💎 Ore Economy
@@ -95,3 +95,6 @@ Source/OreRush/
 - **19/06/2026** — Fixed online match flow: teams persist across seamless travel, players reliably spawn at their own depot (deferred retry), the lobby countdown cancels if a player leaves, and the win quota is set to 50.
 - **19/06/2026** — Fixed replication so clients see correct ore types (gold/diamond no longer look like iron), and turrets now fire on an enemy already standing in range when armed.
 - **19/06/2026** — Reworked the economy: carry capacity is now worth-based (diamonds take more space) with a stronger full-load slowdown, and spending refunds iron change instead of overpaying.
+- **22/06/2026** — Added ore vein meshes and made vein spawn counts scale with the generated map area.
+- **23/06/2026** — Fixed the mining duration, wired miner animations, added the end screen widget, and removed the reveal power-up (4 power-ups remain).
+- **02/07/2026** — Added marketplace (Fab) meshes — turret, landmine, barrier, shield, spike trap, coin — and wired them to the traps, defenses and power-ups.
