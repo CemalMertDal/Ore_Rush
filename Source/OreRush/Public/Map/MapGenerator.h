@@ -82,6 +82,15 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map|Seed")
 	int32 SeedOverride = 12345;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map|Trace")
+	float MaxTraceHeight = 10000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map|Trace")
+	float MinTraceHeight = 10000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map|Trace", meta = (ClampMin = "0.0", ClampMax = "90.0"))
+	float MaxSlopeAngle = 30.f;
+
 private:
 	void Generate(int32 Seed);
 
@@ -90,6 +99,8 @@ private:
 	int32 ScaledCount(int32 Base) const;
 
 	bool PickPoint(FRandomStream& Rng, FVector& OutPoint);
+
+	bool GetGroundLocation(const FVector& InLocation, FVector& OutGroundLocation, FVector& OutNormal, bool bCheckObstacles) const;
 
 	TArray<FVector> UsedPoints;
 };

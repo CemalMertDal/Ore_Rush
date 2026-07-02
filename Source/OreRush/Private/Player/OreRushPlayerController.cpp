@@ -3,6 +3,8 @@
 #include "Game/OreRushGameMode.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/AudioComponent.h"
 
 void AOreRushPlayerController::BeginPlay()
 {
@@ -13,6 +15,11 @@ void AOreRushPlayerController::BeginPlay()
 		bShowMouseCursor = false;
 		FInputModeGameOnly InputMode;
 		SetInputMode(InputMode);
+
+		if (BackgroundMusic)
+		{
+			MusicAudioComponent = UGameplayStatics::SpawnSound2D(this, BackgroundMusic, 1.0f, 1.0f, 0.0f, nullptr, true);
+		}
 	}
 }
 

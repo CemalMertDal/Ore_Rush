@@ -14,6 +14,7 @@ public class OreRush : ModuleRules
             "InputCore",
             "EnhancedInput",
             "UMG",
+            "Niagara",
             "OnlineSubsystem",
             "OnlineSubsystemUtils"
         });

@@ -8,6 +8,7 @@
 #include "Engine/World.h"
 #include "Character/OreRushCharacter.h"
 #include "Components/WalletComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AOreVein::AOreVein()
 {
@@ -179,6 +180,10 @@ void AOreVein::OnRep_RemainingUnits()
 void AOreVein::MulticastMineHit_Implementation()
 {
 	OnMineHitFX();
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
+	}
 }
 
 void AOreVein::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

@@ -20,6 +20,8 @@
 #include "TimerManager.h"
 #include "Net/UnrealNetwork.h"
 #include "EngineUtils.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Materials/MaterialInterface.h"
 
 AOreRushCharacter::AOreRushCharacter()
 {
@@ -79,6 +81,48 @@ void AOreRushCharacter::BeginPlay()
 	if (Wallet)
 	{
 		Wallet->OnWalletChanged.AddDynamic(this, &AOreRushCharacter::UpdateCarrySpeed);
+	}
+
+	RefreshTeamMaterial();
+}
+
+void AOreRushCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	RefreshTeamMaterial();
+}
+
+void AOreRushCharacter::RefreshTeamMaterial()
+{
+	const AOreRushPlayerState* PS = GetPlayerState<AOreRushPlayerState>();
+	if (PS == nullptr || PS->GetTeam() == ETeam::None)
+	{
+		if (TeamMaterialRetryCount < 20)
+		{
+			TeamMaterialRetryCount++;
+			GetWorldTimerManager().SetTimer(TeamMaterialRetryTimer, this, &AOreRushCharacter::RefreshTeamMaterial, 0.25f, false);
+		}
+		return;
+	}
+
+	ApplyTeamMaterials(PS->GetTeam());
+}
+
+void AOreRushCharacter::ApplyTeamMaterials(ETeam Team)
+{
+	USkeletalMeshComponent* SkelMesh = GetMesh();
+	if (SkelMesh == nullptr || Team == ETeam::None)
+	{
+		return;
+	}
+
+	const TArray<TObjectPtr<UMaterialInterface>>& Materials = (Team == ETeam::Red) ? RedTeamMaterials : BlueTeamMaterials;
+	for (int32 i = 0; i < Materials.Num(); ++i)
+	{
+		if (Materials[i])
+		{
+			SkelMesh->SetMaterial(i, Materials[i]);
+		}
 	}
 }
 

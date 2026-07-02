@@ -5,6 +5,9 @@
 #include "GameFramework/PlayerController.h"
 #include "OreRushPlayerController.generated.h"
 
+class USoundBase;
+class UAudioComponent;
+
 UCLASS()
 class ORERUSH_API AOreRushPlayerController : public APlayerController
 {
@@ -19,6 +22,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "Ore Rush|Match")
 	void ServerRequestRestart();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Sound")
+	TObjectPtr<USoundBase> BackgroundMusic;
+
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Ore Rush|Sound")
+	TObjectPtr<UAudioComponent> MusicAudioComponent;
 
 protected:
 	virtual void BeginPlay() override;

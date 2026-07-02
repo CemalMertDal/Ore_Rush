@@ -72,18 +72,13 @@ void ADepotZone::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Oth
 		EndRaid(true);
 	}
 
-	if (PS->GetTeam() != Team || Team == ETeam::None)
+	if (Team == ETeam::None)
 	{
-		FString Msg = FString::Printf(TEXT("[%s] Yanlis alan veya calinacak mal yok! (Senin takimin: %s, Depo takimi: %s)"),
-			*Character->GetName(),
-			(PS->GetTeam() == ETeam::Blue ? TEXT("Mavi") : (PS->GetTeam() == ETeam::Red ? TEXT("Kirmizi") : TEXT("None"))),
-			(Team == ETeam::Blue ? TEXT("Mavi") : (Team == ETeam::Red ? TEXT("Kirmizi") : TEXT("None"))));
-		
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *Msg);
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Msg);
-		}
+		return;
+	}
+
+	if (PS->GetTeam() != Team)
+	{
 		return;
 	}
 

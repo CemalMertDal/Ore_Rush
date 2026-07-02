@@ -11,6 +11,7 @@ class UBoxComponent;
 class UStaticMeshComponent;
 class UStaticMesh;
 class AOreRushCharacter;
+class USoundBase;
 
 UCLASS()
 class ORERUSH_API AOreVein : public AActor, public IOreRushInteractable
@@ -41,6 +42,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Vein")
 	TMap<EOreType, float> MineTimes;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Vein|Sound")
+	TObjectPtr<USoundBase> HitSound;
 
 	UFUNCTION(BlueprintPure, Category = "Ore Rush|Vein")
 	float GetEffectiveMineTime() const;

@@ -18,6 +18,7 @@ public:
 
 	virtual void InitGameState() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
 
 	void CheckWinCondition();
 
@@ -31,6 +32,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Ore Rush|Match")
 	int32 QuotaTarget = 50;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Ore Rush|Match", meta = (ClampMin = "1"))
+	int32 MaxPlayers = 2;
 
 	ETeam PickTeamForNewPlayer();
 

@@ -16,6 +16,7 @@ class UInputMappingContext;
 class UWalletComponent;
 class UBuildComponent;
 class AOreVein;
+class UMaterialInterface;
 struct FInputActionValue;
 
 UCLASS()
@@ -40,6 +41,8 @@ public:
 	void ServerApplySlow(float Mult, float Duration);
 
 	void NotifyInteractFinished(UObject* Source);
+
+	void ApplyTeamMaterials(ETeam Team);
 
 	void ServerApplySpeedBuff(float Mult, float Duration);
 	void ServerApplyMiningBuff(float Mult, float Duration);
@@ -69,6 +72,13 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void OnRep_PlayerState() override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Team")
+	TArray<TObjectPtr<UMaterialInterface>> RedTeamMaterials;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ore Rush|Team")
+	TArray<TObjectPtr<UMaterialInterface>> BlueTeamMaterials;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ore Rush|Camera")
 	TObjectPtr<USpringArmComponent> CameraBoom;
@@ -206,6 +216,8 @@ private:
 	UFUNCTION()
 	void UpdateCarrySpeed();
 
+	void RefreshTeamMaterial();
+
 	UFUNCTION(Server, Reliable)
 	void ServerPlaceTrap();
 
@@ -232,6 +244,8 @@ private:
 	FTimerHandle SpeedBuffTimerHandle;
 	FTimerHandle MiningBuffTimerHandle;
 	FTimerHandle ShieldTimerHandle;
+	FTimerHandle TeamMaterialRetryTimer;
+	int32 TeamMaterialRetryCount = 0;
 	float BaseWalkSpeed = 500.f;
 
 	FVector LastMoveWorldDir = FVector::ZeroVector;

@@ -33,7 +33,7 @@ public:
 	int32 StealPerTick = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ore Rush|Depot|Raid", meta = (ClampMin = "0.05"))
-	float RaidTickInterval = 0.5f;
+	float RaidTickInterval = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ore Rush|Depot|Raid", meta = (ClampMin = "0.0"))
 	float RaidGrace = 5.f;

@@ -56,6 +56,21 @@ void AOreRushGameMode::PostLogin(APlayerController* NewPlayer)
 	}
 }
 
+void AOreRushGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
+{
+	Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
+
+	if (!ErrorMessage.IsEmpty())
+	{
+		return;
+	}
+
+	if (GetNumPlayers() >= MaxPlayers)
+	{
+		ErrorMessage = TEXT("Lobi dolu");
+	}
+}
+
 void AOreRushGameMode::HandleSeamlessTravelPlayer(AController*& C)
 {
 	Super::HandleSeamlessTravelPlayer(C);
