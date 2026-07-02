@@ -61,7 +61,7 @@ Source/OreRush/
 
 ## 🚀 Getting Started
 
--On development
+-Download realsed version and start to play
 
 ## 🗺️ Roadmap
 
@@ -73,9 +73,9 @@ Source/OreRush/
 - [x] Depot raiding + defenses
 - [x] Power-ups
 - [x] Procedural map generation
-- [ ] UI (menu / HUD / tutorial / end screen)
-- [ ] Cosmetics + SFX/VFX + balancing
-- [ ] Packaging
+- [X] UI (menu / HUD / tutorial / end screen)
+- [X] Cosmetics + SFX/VFX + balancing
+- [X] Packaging
 
 ## 📝 Changelog
 
@@ -98,3 +98,8 @@ Source/OreRush/
 - **22/06/2026** — Added ore vein meshes and made vein spawn counts scale with the generated map area.
 - **23/06/2026** — Fixed the mining duration, wired miner animations, added the end screen widget, and removed the reveal power-up (4 power-ups remain).
 - **02/07/2026** — Added marketplace (Fab) meshes — turret, landmine, barrier, shield, spike trap, coin — and wired them to the traps, defenses and power-ups.
+- **02/07/2026** — Added background music to the Player Controller and mining hit sounds to the ore veins.
+- **02/07/2026** — Added Niagara smoke VFX to the Smoke Cloud and integrated LowPolyForest environment assets (rocks, trees, etc.) into the Map Generator decoration pool.
+- **02/07/2026** — Implemented dynamic team skins and materials (Red vs Blue) applied automatically on character initialization.
+- **02/07/2026** — Added height tracing and slope angle constraints (MaxSlopeAngle = 30) to the Map Generator to guarantee all spawned actors spawn on traversable terrain.
+
